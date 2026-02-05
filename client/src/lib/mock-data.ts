@@ -32,6 +32,25 @@ export interface Submission {
   rejectionReason?: string;
 }
 
+export interface Payout {
+  id: string;
+  workerId: string;
+  amount: number;
+  status: "pending" | "paid";
+  createdAt: string;
+  paidAt?: string;
+}
+
+export interface Notification {
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  type: "info" | "success" | "warning";
+  read: boolean;
+  createdAt: string;
+}
+
 // Mock Data Store
 export const MOCK_USERS: User[] = [
   { id: "u1", name: "Admin User", email: "admin@dataentry.pro", role: "admin", balance: 0 },
@@ -61,25 +80,35 @@ export const MOCK_TASKS: Task[] = [
   }
 ];
 
-export const MOCK_SUBMISSIONS: Submission[] = [];
-
 // Zustand Store for simple state management in mockup
 interface AppState {
   currentUser: User | null;
   tasks: Task[];
   submissions: Submission[];
+  payouts: Payout[];
+  notifications: Notification[];
   login: (email: string, role: "admin" | "worker") => void;
   logout: () => void;
   addTask: (task: Omit<Task, "id" | "createdAt" | "status">) => void;
   assignTask: (taskId: string, workerId: string) => void;
   submitTask: (taskId: string, fileName: string, data: any[]) => void;
   reviewSubmission: (submissionId: string, status: "approved" | "rejected", reason?: string) => void;
+  markAsPaid: (payoutId: string) => void;
+  markNotificationRead: (id: string) => void;
+  addNotification: (userId: string, title: string, message: string, type: Notification["type"]) => void;
 }
 
 export const useStore = create<AppState>((set) => ({
-  currentUser: MOCK_USERS[1], // Start logged in as worker for demo
+  currentUser: MOCK_USERS[1], // Sarah Worker
   tasks: MOCK_TASKS,
-  submissions: MOCK_SUBMISSIONS,
+  submissions: [],
+  payouts: [
+    { id: "p1", workerId: "u2", amount: 50.00, status: "paid", createdAt: "2024-02-01T10:00:00Z", paidAt: "2024-02-02T14:00:00Z" },
+    { id: "p2", workerId: "u2", amount: 75.50, status: "pending", createdAt: "2024-02-14T09:00:00Z" }
+  ],
+  notifications: [
+    { id: "n1", userId: "u2", title: "Welcome!", message: "Thanks for joining DataEntry Pro.", type: "info", read: false, createdAt: new Date().toISOString() }
+  ],
   
   login: (email, role) => {
     const user = MOCK_USERS.find(u => u.role === role) || 
@@ -131,8 +160,30 @@ export const useStore = create<AppState>((set) => ({
     if (!task) return state;
 
     const earnings = status === "approved" ? submission.rowCount * task.payPerRow : 0;
+    
+    const newNotifications: Notification[] = [...state.notifications, {
+      id: Math.random().toString(36).substr(2, 9),
+      userId: submission.workerId,
+      title: status === "approved" ? "Task Approved!" : "Task Rejected",
+      message: status === "approved" 
+        ? `Your submission for "${task.title}" was approved. $${earnings.toFixed(2)} added to pending.`
+        : `Your submission for "${task.title}" was rejected. Reason: ${reason || "No reason provided."}`,
+      type: status === "approved" ? "success" : "warning",
+      read: false,
+      createdAt: new Date().toISOString()
+    }];
+
+    const newPayouts = status === "approved" ? [...state.payouts, {
+      id: Math.random().toString(36).substr(2, 9),
+      workerId: submission.workerId,
+      amount: earnings,
+      status: "pending" as const,
+      createdAt: new Date().toISOString()
+    }] : state.payouts;
 
     return {
+      notifications: newNotifications,
+      payouts: newPayouts,
       submissions: state.submissions.map(s => 
         s.id === submissionId ? { ...s, status, rejectionReason: reason } : s
       ),
@@ -143,5 +194,43 @@ export const useStore = create<AppState>((set) => ({
         ? { ...state.currentUser, balance: state.currentUser.balance + earnings }
         : state.currentUser
     };
-  })
+  }),
+
+  markAsPaid: (payoutId) => set((state) => {
+    const payout = state.payouts.find(p => p.id === payoutId);
+    if (!payout) return state;
+
+    const newNotifications: Notification[] = [...state.notifications, {
+      id: Math.random().toString(36).substr(2, 9),
+      userId: payout.workerId,
+      title: "Payout Released",
+      message: `Your payout of $${payout.amount.toFixed(2)} has been marked as paid.`,
+      type: "success",
+      read: false,
+      createdAt: new Date().toISOString()
+    }];
+
+    return {
+      payouts: state.payouts.map(p => 
+        p.id === payoutId ? { ...p, status: "paid", paidAt: new Date().toISOString() } : p
+      ),
+      notifications: newNotifications
+    };
+  }),
+
+  markNotificationRead: (id) => set((state) => ({
+    notifications: state.notifications.map(n => n.id === id ? { ...n, read: true } : n)
+  })),
+
+  addNotification: (userId, title, message, type) => set((state) => ({
+    notifications: [...state.notifications, {
+      id: Math.random().toString(36).substr(2, 9),
+      userId,
+      title,
+      message,
+      type,
+      read: false,
+      createdAt: new Date().toISOString()
+    }]
+  }))
 }));

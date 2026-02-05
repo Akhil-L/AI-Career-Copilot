@@ -9,6 +9,7 @@ import Auth from "@/pages/auth";
 import WorkerDashboard from "@/pages/dashboard-worker";
 import AdminDashboard from "@/pages/dashboard-admin";
 import TaskDetail from "@/pages/task-detail";
+import PayoutsPage from "@/pages/payouts-worker";
 
 function Router() {
   return (
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/auth" component={Auth} />
       <Route path="/dashboard" component={WorkerDashboard} />
+      <Route path="/payouts" component={PayoutsPage} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/task/:id" component={TaskDetail} />
       <Route component={NotFound} />
