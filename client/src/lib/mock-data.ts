@@ -13,10 +13,10 @@ export interface Task {
   id: string;
   title: string;
   description: string;
-  payAmount: number;
+  payPerRow: number;
   status: "open" | "assigned" | "submitted" | "approved" | "rejected";
   assignedTo?: string; // worker id
-  dataFields: string[]; // Mock definition of fields to enter
+  dataFields: string[]; // Required columns for validation
   createdAt: string;
 }
 
@@ -25,9 +25,11 @@ export interface Submission {
   taskId: string;
   workerId: string;
   submittedAt: string;
-  content: Record<string, string>;
+  fileName: string;
+  rowCount: number;
+  previewData: any[];
   status: "pending" | "approved" | "rejected";
-  feedback?: string;
+  rejectionReason?: string;
 }
 
 // Mock Data Store
@@ -40,72 +42,26 @@ export const MOCK_USERS: User[] = [
 export const MOCK_TASKS: Task[] = [
   { 
     id: "t1", 
-    title: "Digitize Invoice #2024-001", 
-    description: "Transcribe the items, quantities, and prices from the attached invoice image.", 
-    payAmount: 2.50, 
+    title: "Invoice Batch Processing", 
+    description: "Upload CSV with Invoice Number, Date, and Amount.", 
+    payPerRow: 0.25, 
     status: "open", 
-    dataFields: ["Invoice Number", "Date", "Total Amount", "Vendor Name"], 
+    dataFields: ["Invoice Number", "Date", "Amount"], 
     createdAt: "2024-02-10T10:00:00Z" 
   },
   { 
     id: "t2", 
-    title: "Handwritten Note Transcription", 
-    description: "Convert the handwritten meeting notes into text format.", 
-    payAmount: 5.00, 
-    status: "open", 
-    dataFields: ["Date", "Attendees", "Key Points", "Action Items"], 
-    createdAt: "2024-02-11T09:30:00Z" 
-  },
-  { 
-    id: "t3", 
-    title: "Product Catalog Update", 
-    description: "Verify and update product specifications for the electronics category.", 
-    payAmount: 1.75, 
+    title: "Inventory Log Update", 
+    description: "Update product stock levels via Excel file.", 
+    payPerRow: 0.15, 
     status: "assigned", 
     assignedTo: "u2",
-    dataFields: ["Product ID", "Name", "Specs Verified (Y/N)"], 
-    createdAt: "2024-02-12T14:15:00Z" 
-  },
-  { 
-    id: "t4", 
-    title: "Medical Form Entry", 
-    description: "Enter patient intake form data into the secure system fields.", 
-    payAmount: 8.00, 
-    status: "submitted", 
-    assignedTo: "u2",
-    dataFields: ["Patient ID", "DOB", "Symptoms", "Insurance Provider"], 
-    createdAt: "2024-02-09T08:00:00Z" 
-  },
-   { 
-    id: "t5", 
-    title: "Survey Response Entry", 
-    description: "Digitize customer satisfaction survey responses from Q1.", 
-    payAmount: 0.50, 
-    status: "approved", 
-    assignedTo: "u3",
-    dataFields: ["Survey ID", "Rating", "Comments"], 
-    createdAt: "2024-02-08T11:00:00Z" 
-  },
-];
-
-export const MOCK_SUBMISSIONS: Submission[] = [
-  {
-    id: "s1",
-    taskId: "t4",
-    workerId: "u2",
-    submittedAt: "2024-02-12T16:00:00Z",
-    content: { "Patient ID": "P-9923", "DOB": "1985-04-12", "Symptoms": "Headache", "Insurance Provider": "BlueCross" },
-    status: "pending"
-  },
-  {
-    id: "s2",
-    taskId: "t5",
-    workerId: "u3",
-    submittedAt: "2024-02-08T13:30:00Z",
-    content: { "Survey ID": "S-101", "Rating": "5", "Comments": "Great service!" },
-    status: "approved"
+    dataFields: ["Product ID", "Quantity", "Warehouse"], 
+    createdAt: "2024-02-11T09:30:00Z" 
   }
 ];
+
+export const MOCK_SUBMISSIONS: Submission[] = [];
 
 // Zustand Store for simple state management in mockup
 interface AppState {
@@ -116,17 +72,16 @@ interface AppState {
   logout: () => void;
   addTask: (task: Omit<Task, "id" | "createdAt" | "status">) => void;
   assignTask: (taskId: string, workerId: string) => void;
-  submitTask: (taskId: string, content: Record<string, string>) => void;
-  reviewSubmission: (submissionId: string, status: "approved" | "rejected", feedback?: string) => void;
+  submitTask: (taskId: string, fileName: string, data: any[]) => void;
+  reviewSubmission: (submissionId: string, status: "approved" | "rejected", reason?: string) => void;
 }
 
 export const useStore = create<AppState>((set) => ({
-  currentUser: null,
+  currentUser: MOCK_USERS[1], // Start logged in as worker for demo
   tasks: MOCK_TASKS,
   submissions: MOCK_SUBMISSIONS,
   
   login: (email, role) => {
-    // Mock login - just finds first user with that role for demo
     const user = MOCK_USERS.find(u => u.role === role) || 
                 { id: "new", name: "Demo User", email, role, balance: 0 };
     set({ currentUser: user });
@@ -147,7 +102,7 @@ export const useStore = create<AppState>((set) => ({
     tasks: state.tasks.map(t => t.id === taskId ? { ...t, status: "assigned", assignedTo: workerId } : t)
   })),
 
-  submitTask: (taskId, content) => set((state) => {
+  submitTask: (taskId, fileName, data) => set((state) => {
     const task = state.tasks.find(t => t.id === taskId);
     if (!task || !state.currentUser) return state;
 
@@ -156,7 +111,9 @@ export const useStore = create<AppState>((set) => ({
       taskId,
       workerId: state.currentUser.id,
       submittedAt: new Date().toISOString(),
-      content,
+      fileName,
+      rowCount: data.length,
+      previewData: data.slice(0, 10),
       status: "pending"
     };
 
@@ -166,34 +123,25 @@ export const useStore = create<AppState>((set) => ({
     };
   }),
 
-  reviewSubmission: (submissionId, status, feedback) => set((state) => {
+  reviewSubmission: (submissionId, status, reason) => set((state) => {
     const submission = state.submissions.find(s => s.id === submissionId);
     if (!submission) return state;
 
-    // Update submission status
-    const updatedSubmissions = state.submissions.map(s => 
-      s.id === submissionId ? { ...s, status, feedback } : s
-    );
+    const task = state.tasks.find(t => t.id === submission.taskId);
+    if (!task) return state;
 
-    // Update task status
-    const updatedTasks = state.tasks.map(t => 
-      t.id === submission.taskId ? { ...t, status: status === "approved" ? "approved" : "rejected" } : t
-    );
+    const earnings = status === "approved" ? submission.rowCount * task.payPerRow : 0;
 
-    // If approved, add balance to worker (mock logic)
-    if (status === "approved") {
-      // In a real app we'd update the specific user in the DB. 
-      // Here we just update if it's the current user for visual feedback
-      if (state.currentUser?.id === submission.workerId) {
-        const task = state.tasks.find(t => t.id === submission.taskId);
-        return {
-          submissions: updatedSubmissions,
-          tasks: updatedTasks,
-          currentUser: { ...state.currentUser, balance: state.currentUser.balance + (task?.payAmount || 0) }
-        };
-      }
-    }
-
-    return { submissions: updatedSubmissions, tasks: updatedTasks };
+    return {
+      submissions: state.submissions.map(s => 
+        s.id === submissionId ? { ...s, status, rejectionReason: reason } : s
+      ),
+      tasks: state.tasks.map(t => 
+        t.id === submission.taskId ? { ...t, status: status === "approved" ? "approved" : "rejected" } : t
+      ),
+      currentUser: state.currentUser?.id === submission.workerId 
+        ? { ...state.currentUser, balance: state.currentUser.balance + earnings }
+        : state.currentUser
+    };
   })
 }));
