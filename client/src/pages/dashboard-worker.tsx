@@ -4,14 +4,31 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Link } from "wouter";
-import { DollarSign, Clock, CheckCircle2, TrendingUp, ArrowRight, FileText } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { DollarSign, Clock, CheckCircle2, TrendingUp, ArrowRight, FileText, ShieldAlert } from "lucide-react";
 
 export default function WorkerDashboard() {
   const { currentUser, tasks, assignTask } = useStore();
+  const [, setLocation] = useLocation();
   
   if (!currentUser) return <div className="p-8 text-center">Please log in</div>;
+
+  if (currentUser.role !== 'worker') {
+    return (
+      <Layout>
+        <div className="flex flex-col items-center justify-center py-20 animate-in fade-in slide-in-from-bottom-4">
+          <div className="p-4 rounded-full bg-blue-50 text-blue-600 mb-6">
+            <ShieldAlert className="h-12 w-12" />
+          </div>
+          <h1 className="text-3xl font-heading font-bold text-slate-900 mb-2">Wrong Dashboard</h1>
+          <p className="text-slate-500 mb-8 max-w-md text-center">You are logged in as an administrator. Please use the admin portal to manage the platform.</p>
+          <Button onClick={() => setLocation("/admin")} className="font-semibold">
+            Go to Admin Portal
+          </Button>
+        </div>
+      </Layout>
+    );
+  }
 
   const myTasks = tasks.filter(t => t.assignedTo === currentUser.id && t.status !== "approved" && t.status !== "rejected");
   const availableTasks = tasks.filter(t => t.status === "open");
@@ -128,7 +145,7 @@ export default function WorkerDashboard() {
 
 function TaskCard({ task, actionLabel, onAction, linkTo, variant, disabled }: { task: Task, actionLabel: string, onAction?: () => void, linkTo?: string, variant?: "default" | "outline", disabled?: boolean }) {
   const CardWrapper = ({ children }: { children: React.ReactNode }) => (
-    <Card className="hover:shadow-md transition-shadow flex flex-col h-full border-slate-200">
+    <Card className="hover:shadow-md transition-shadow flex flex-col h-full border-slate-200 bg-white">
       {children}
     </Card>
   );
@@ -141,7 +158,7 @@ function TaskCard({ task, actionLabel, onAction, linkTo, variant, disabled }: { 
             Data Entry
           </Badge>
           <span className="font-mono font-bold text-green-600 bg-green-50 px-2 py-1 rounded text-sm">
-            ${task.payAmount.toFixed(2)}
+            ${task.payPerRow.toFixed(2)}/row
           </span>
         </div>
         <CardTitle className="text-lg leading-tight">{task.title}</CardTitle>

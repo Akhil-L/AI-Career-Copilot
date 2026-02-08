@@ -3,12 +3,32 @@ import { useStore, Payout } from "@/lib/mock-data";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { DollarSign, Clock, CheckCircle2, ArrowUpRight } from "lucide-react";
+import { DollarSign, Clock, CheckCircle2, ShieldAlert } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useLocation } from "wouter";
 
 export default function PayoutsPage() {
   const { currentUser, payouts } = useStore();
+  const [, setLocation] = useLocation();
   
   if (!currentUser) return <Layout><div>Please log in</div></Layout>;
+
+  if (currentUser.role !== 'worker') {
+    return (
+      <Layout>
+        <div className="flex flex-col items-center justify-center py-20 animate-in fade-in slide-in-from-bottom-4">
+          <div className="p-4 rounded-full bg-blue-50 text-blue-600 mb-6">
+            <ShieldAlert className="h-12 w-12" />
+          </div>
+          <h1 className="text-3xl font-heading font-bold text-slate-900 mb-2">Wrong Section</h1>
+          <p className="text-slate-500 mb-8 max-w-md text-center">Administrators manage payments through the admin portal. Personal earning statements are for worker accounts only.</p>
+          <Button onClick={() => setLocation("/admin")} className="font-semibold">
+            Go to Admin Portal
+          </Button>
+        </div>
+      </Layout>
+    );
+  }
 
   const workerPayouts = payouts.filter(p => p.workerId === currentUser.id).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   
@@ -68,7 +88,7 @@ export default function PayoutsPage() {
           </Card>
         </div>
 
-        <Card className="border-slate-200 shadow-sm">
+        <Card className="border-slate-200 shadow-sm bg-white">
           <CardHeader>
             <CardTitle className="text-lg">Payment History</CardTitle>
             <CardDescription>All your approved task earnings and their current payout status.</CardDescription>

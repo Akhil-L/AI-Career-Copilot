@@ -98,7 +98,7 @@ interface AppState {
   addNotification: (userId: string, title: string, message: string, type: Notification["type"]) => void;
 }
 
-export const useStore = create<AppState>((set) => ({
+export const useStore = create<AppState>((set, get) => ({
   currentUser: MOCK_USERS[1], // Sarah Worker
   tasks: MOCK_TASKS,
   submissions: [],
@@ -118,22 +118,32 @@ export const useStore = create<AppState>((set) => ({
 
   logout: () => set({ currentUser: null }),
 
-  addTask: (taskData) => set((state) => ({
-    tasks: [...state.tasks, { 
-      ...taskData, 
-      id: Math.random().toString(36).substr(2, 9), 
-      status: "open", 
-      createdAt: new Date().toISOString() 
-    }]
-  })),
+  addTask: (taskData) => {
+    const { currentUser } = get();
+    if (currentUser?.role !== 'admin') return;
+    set((state) => ({
+      tasks: [...state.tasks, { 
+        ...taskData, 
+        id: Math.random().toString(36).substr(2, 9), 
+        status: "open", 
+        createdAt: new Date().toISOString() 
+      }]
+    }));
+  },
 
-  assignTask: (taskId, workerId) => set((state) => ({
-    tasks: state.tasks.map(t => t.id === taskId ? { ...t, status: "assigned", assignedTo: workerId } : t)
-  })),
+  assignTask: (taskId, workerId) => {
+    const { currentUser } = get();
+    // Worker can only assign to themselves, admin can assign to anyone
+    if (currentUser?.role !== 'admin' && currentUser?.id !== workerId) return;
+    set((state) => ({
+      tasks: state.tasks.map(t => t.id === taskId ? { ...t, status: "assigned", assignedTo: workerId } : t)
+    }));
+  },
 
   submitTask: (taskId, fileName, data) => set((state) => {
     const task = state.tasks.find(t => t.id === taskId);
     if (!task || !state.currentUser) return state;
+    if (task.assignedTo !== state.currentUser.id) return state;
 
     const newSubmission: Submission = {
       id: Math.random().toString(36).substr(2, 9),
@@ -153,6 +163,8 @@ export const useStore = create<AppState>((set) => ({
   }),
 
   reviewSubmission: (submissionId, status, reason) => set((state) => {
+    if (state.currentUser?.role !== 'admin') return state;
+    
     const submission = state.submissions.find(s => s.id === submissionId);
     if (!submission) return state;
 
@@ -190,6 +202,7 @@ export const useStore = create<AppState>((set) => ({
       tasks: state.tasks.map(t => 
         t.id === submission.taskId ? { ...t, status: status === "approved" ? "approved" : "rejected" } : t
       ),
+      // Update balance for the worker if they happen to be the logged in user
       currentUser: state.currentUser?.id === submission.workerId 
         ? { ...state.currentUser, balance: state.currentUser.balance + earnings }
         : state.currentUser
@@ -197,6 +210,8 @@ export const useStore = create<AppState>((set) => ({
   }),
 
   markAsPaid: (payoutId) => set((state) => {
+    if (state.currentUser?.role !== 'admin') return state;
+    
     const payout = state.payouts.find(p => p.id === payoutId);
     if (!payout) return state;
 
@@ -218,19 +233,27 @@ export const useStore = create<AppState>((set) => ({
     };
   }),
 
-  markNotificationRead: (id) => set((state) => ({
-    notifications: state.notifications.map(n => n.id === id ? { ...n, read: true } : n)
-  })),
+  markNotificationRead: (id) => set((state) => {
+    const notification = state.notifications.find(n => n.id === id);
+    if (notification?.userId !== state.currentUser?.id) return state;
+    return {
+      notifications: state.notifications.map(n => n.id === id ? { ...n, read: true } : n)
+    };
+  }),
 
-  addNotification: (userId, title, message, type) => set((state) => ({
-    notifications: [...state.notifications, {
-      id: Math.random().toString(36).substr(2, 9),
-      userId,
-      title,
-      message,
-      type,
-      read: false,
-      createdAt: new Date().toISOString()
-    }]
-  }))
+  addNotification: (userId, title, message, type) => set((state) => {
+    const { currentUser } = get();
+    if (currentUser?.role !== 'admin' && currentUser?.id !== userId) return state;
+    return {
+      notifications: [...state.notifications, {
+        id: Math.random().toString(36).substr(2, 9),
+        userId,
+        title,
+        message,
+        type,
+        read: false,
+        createdAt: new Date().toISOString()
+      }]
+    };
+  })
 }));

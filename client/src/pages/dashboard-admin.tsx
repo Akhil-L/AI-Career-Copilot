@@ -20,27 +20,47 @@ import {
   TrendingUp, 
   DollarSign,
   Activity,
-  CreditCard
+  CreditCard,
+  ShieldAlert
 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 
 export default function AdminDashboard() {
   const { currentUser, tasks, submissions, payouts, reviewSubmission, addTask, markAsPaid } = useStore();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [newTask, setNewTask] = useState({ title: "", description: "", payPerRow: "0.10", dataFields: "" });
+
+  const [reviewSub, setReviewSub] = useState<Submission | null>(null);
+  const [rejectionReason, setRejectionReason] = useState("");
+
+  if (!currentUser || currentUser.role !== "admin") {
+    return (
+      <Layout>
+        <div className="flex flex-col items-center justify-center py-20 animate-in fade-in slide-in-from-bottom-4">
+          <div className="p-4 rounded-full bg-red-50 text-red-600 mb-6">
+            <ShieldAlert className="h-12 w-12" />
+          </div>
+          <h1 className="text-3xl font-heading font-bold text-slate-900 mb-2">Unauthorized Access</h1>
+          <p className="text-slate-500 mb-8 max-w-md text-center">You do not have the required administrative permissions to view this page.</p>
+          <Button onClick={() => setLocation("/dashboard")} className="font-semibold">
+            Return to My Dashboard
+          </Button>
+        </div>
+      </Layout>
+    );
+  }
+
   const pendingSubmissions = submissions.filter(s => s.status === "pending");
   const pendingPayouts = payouts.filter(p => p.status === "pending");
   
   const totalApprovedEarnings = payouts.reduce((sum, p) => sum + p.amount, 0);
   const totalPaid = payouts.filter(p => p.status === 'paid').reduce((sum, p) => sum + p.amount, 0);
   const totalPendingPayout = payouts.filter(p => p.status === 'pending').reduce((sum, p) => sum + p.amount, 0);
-
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [newTask, setNewTask] = useState({ title: "", description: "", payPerRow: "0.10", dataFields: "" });
-
-  const [reviewSub, setReviewSub] = useState<Submission | null>(null);
-  const [rejectionReason, setRejectionReason] = useState("");
 
   const handleCreateTask = () => {
     addTask({
@@ -58,9 +78,11 @@ export default function AdminDashboard() {
     reviewSubmission(reviewSub.id, status, status === 'rejected' ? rejectionReason : undefined);
     setReviewSub(null);
     setRejectionReason("");
+    toast({ 
+      title: status === 'approved' ? "Submission Approved" : "Submission Rejected",
+      description: status === 'approved' ? "Worker earnings updated." : "Worker notified."
+    });
   };
-
-  if (!currentUser || currentUser.role !== "admin") return <div className="p-8 text-center font-bold text-red-500">ACCESS DENIED</div>;
 
   return (
     <Layout>
@@ -95,7 +117,7 @@ export default function AdminDashboard() {
         {/* Analytics Dashboard */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <AnalyticsCard title="Total Approved" value={`$${totalApprovedEarnings.toFixed(2)}`} icon={DollarSign} color="blue" />
-          <AnalyticsCard title="Pending Payouts" value={`$${totalPendingPayout.toFixed(2)}`} icon={Clock} color="orange" />
+          <AnalyticsCard title="Pending Payouts" value={`$${totalPendingPayout.toFixed(2)}`} icon={CreditCard} color="orange" />
           <AnalyticsCard title="Paid to Workers" value={`$${totalPaid.toFixed(2)}`} icon={CheckCircle2} color="emerald" />
           <AnalyticsCard title="Active Workers" value="2,541" icon={Users} color="slate" />
         </div>
@@ -159,7 +181,7 @@ export default function AdminDashboard() {
                                     <span className="text-xs font-bold text-slate-600">Sample Preview (Top 10)</span>
                                     <Badge className="bg-white text-slate-900 border-slate-300">Verified Format</Badge>
                                   </div>
-                                  <ScrollArea className="h-40">
+                                  <div className="max-h-40 overflow-auto">
                                     <Table>
                                       <TableBody>
                                         {sub.previewData.map((row, i) => (
@@ -169,7 +191,7 @@ export default function AdminDashboard() {
                                         ))}
                                       </TableBody>
                                     </Table>
-                                  </ScrollArea>
+                                  </div>
                                 </div>
                                 <div className="space-y-2">
                                   <Label className="text-xs font-bold">Feedback / Rejection Reason</Label>
