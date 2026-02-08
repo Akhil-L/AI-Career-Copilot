@@ -11,17 +11,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { 
   Users, 
-  FileCheck, 
-  AlertCircle, 
   Plus, 
   Eye, 
   Check, 
   X, 
   TrendingUp, 
   DollarSign,
-  Activity,
   CreditCard,
-  ShieldAlert
+  ShieldAlert,
+  Clock,
+  CheckCircle2
 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -33,7 +32,7 @@ export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [newTask, setNewTask] = useState({ title: "", description: "", payPerRow: "0.10", dataFields: "" });
+  const [newTask, setNewTask] = useState({ title: "", description: "", payPerRow: "0.10", dataFields: "", maxRows: "100" });
 
   const [reviewSub, setReviewSub] = useState<Submission | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
@@ -67,6 +66,7 @@ export default function AdminDashboard() {
       title: newTask.title,
       description: newTask.description,
       payPerRow: parseFloat(newTask.payPerRow),
+      maxRows: parseInt(newTask.maxRows),
       dataFields: newTask.dataFields.split(",").map(s => s.trim())
     });
     setIsCreateOpen(false);
@@ -106,6 +106,7 @@ export default function AdminDashboard() {
                 <div className="grid gap-2"><Label className="text-xs font-bold uppercase text-slate-500">Instructions</Label><Textarea value={newTask.description} onChange={e => setNewTask({...newTask, description: e.target.value})} placeholder="Detailed steps for workers..." className="min-h-[100px]" /></div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2"><Label className="text-xs font-bold uppercase text-slate-500">Pay per Row ($)</Label><Input type="number" step="0.01" value={newTask.payPerRow} onChange={e => setNewTask({...newTask, payPerRow: e.target.value})} /></div>
+                  <div className="grid gap-2"><Label className="text-xs font-bold uppercase text-slate-500">Max Rows</Label><Input type="number" value={newTask.maxRows} onChange={e => setNewTask({...newTask, maxRows: e.target.value})} /></div>
                 </div>
                 <div className="grid gap-2"><Label className="text-xs font-bold uppercase text-slate-500">Required Columns (comma separated)</Label><Input placeholder="Email, Name, ID" value={newTask.dataFields} onChange={e => setNewTask({...newTask, dataFields: e.target.value})} /></div>
               </div>
@@ -133,7 +134,7 @@ export default function AdminDashboard() {
           </TabsList>
 
           <TabsContent value="submissions">
-            <Card className="border-slate-200 shadow-sm overflow-hidden">
+            <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
               <CardHeader className="bg-slate-50/50 border-b">
                 <CardTitle className="text-lg">Recent Submissions</CardTitle>
                 <CardDescription>Review worker submissions and approve for payment.</CardDescription>
@@ -227,7 +228,7 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="payouts">
-            <Card className="border-slate-200 shadow-sm overflow-hidden">
+            <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
               <CardHeader className="bg-slate-50/50 border-b">
                 <CardTitle className="text-lg">Payout Management</CardTitle>
                 <CardDescription>Release approved earnings to worker accounts.</CardDescription>
@@ -283,7 +284,7 @@ function AnalyticsCard({ title, value, icon: Icon, color }: { title: string, val
   };
 
   return (
-    <Card className="border-slate-200 shadow-sm">
+    <Card className="border-slate-200 shadow-sm bg-white">
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className={`p-2 rounded-lg border ${colors[color]}`}>

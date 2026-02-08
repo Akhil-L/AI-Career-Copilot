@@ -17,6 +17,7 @@ export interface Task {
   status: "open" | "assigned" | "submitted" | "approved" | "rejected";
   assignedTo?: string; // worker id
   dataFields: string[]; // Required columns for validation
+  maxRows: number; // Configurable max rows per task
   createdAt: string;
 }
 
@@ -66,6 +67,7 @@ export const MOCK_TASKS: Task[] = [
     payPerRow: 0.25, 
     status: "open", 
     dataFields: ["Invoice Number", "Date", "Amount"], 
+    maxRows: 100,
     createdAt: "2024-02-10T10:00:00Z" 
   },
   { 
@@ -76,6 +78,7 @@ export const MOCK_TASKS: Task[] = [
     status: "assigned", 
     assignedTo: "u2",
     dataFields: ["Product ID", "Quantity", "Warehouse"], 
+    maxRows: 50,
     createdAt: "2024-02-11T09:30:00Z" 
   }
 ];
@@ -144,6 +147,8 @@ export const useStore = create<AppState>((set, get) => ({
     const task = state.tasks.find(t => t.id === taskId);
     if (!task || !state.currentUser) return state;
     if (task.assignedTo !== state.currentUser.id) return state;
+    // Extra guard against duplicate active submissions
+    if (task.status === 'submitted' || task.status === 'approved') return state;
 
     const newSubmission: Submission = {
       id: Math.random().toString(36).substr(2, 9),

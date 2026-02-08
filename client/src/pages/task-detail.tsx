@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Upload, FileText, AlertCircle, CheckCircle2, ShieldAlert } from "lucide-react";
-import { Link } from "wouter";
+import { ArrowLeft, Upload, FileText, AlertCircle, CheckCircle2, ShieldAlert, ListChecks } from "lucide-react";
 import { useState, useRef } from "react";
 
 export default function TaskDetail() {
@@ -16,15 +15,14 @@ export default function TaskDetail() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   
   const task = tasks.find(t => t.id === id);
   const submission = submissions.find(s => s.taskId === id && s.workerId === currentUser?.id);
 
   if (!currentUser) return <Layout><div className="p-8 text-center">Please log in to view task details.</div></Layout>;
-
   if (!task) return <Layout><div>Task not found</div></Layout>;
 
-  // Security: Workers can only view tasks assigned to them (or open tasks)
   const isAssignedToMe = task.assignedTo === currentUser.id;
   const isOpenTask = task.status === 'open';
 
@@ -45,46 +43,98 @@ export default function TaskDetail() {
     );
   }
 
+  const validateAndParseFile = async (file: File): Promise<{ success: boolean; data?: any[]; error?: string }> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const content = e.target?.result as string;
+          const rows = content.split('\n').filter(row => row.trim());
+          
+          if (rows.length < 2) {
+            resolve({ success: false, error: "File appears to be empty or missing headers." });
+            return;
+          }
+
+          const headers = rows[0].split(',').map(h => h.trim().replace(/"/g, ''));
+          const dataRows = rows.slice(1);
+
+          // Required Column Check
+          const missingColumns = task.dataFields.filter(f => !headers.includes(f));
+          if (missingColumns.length > 0) {
+            resolve({ 
+              success: false, 
+              error: `Missing required columns: ${missingColumns.join(', ')}. Please check the template instructions.` 
+            });
+            return;
+          }
+
+          // Row Count Check
+          if (dataRows.length > task.maxRows) {
+            resolve({ 
+              success: false, 
+              error: `This task allows a maximum of ${task.maxRows} rows. Your file has ${dataRows.length} rows.` 
+            });
+            return;
+          }
+
+          const parsedData = dataRows.map(row => {
+            const values = row.split(',').map(v => v.trim().replace(/"/g, ''));
+            const obj: any = {};
+            headers.forEach((h, i) => obj[h] = values[i]);
+            return obj;
+          });
+
+          resolve({ success: true, data: parsedData });
+        } catch (err) {
+          resolve({ success: false, error: "Failed to parse file. Ensure it's a valid CSV format." });
+        }
+      };
+      reader.onerror = () => resolve({ success: false, error: "File reading error." });
+      reader.readAsText(file);
+    });
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
 
     const ext = selectedFile.name.split('.').pop()?.toLowerCase();
     if (ext !== 'csv' && ext !== 'xlsx') {
-      toast({ 
-        title: "Invalid file type", 
-        description: "Only CSV and XLSX files are allowed.", 
-        variant: "destructive" 
-      });
+      toast({ title: "Invalid file type", description: "Only CSV and XLSX files are allowed.", variant: "destructive" });
       return;
     }
 
     if (selectedFile.size > 5 * 1024 * 1024) {
-      toast({ 
-        title: "File too large", 
-        description: "Maximum file size is 5MB.", 
-        variant: "destructive" 
-      });
+      toast({ title: "File too large", description: "Maximum file size is 5MB.", variant: "destructive" });
       return;
     }
 
     setFile(selectedFile);
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!file) return;
+    setIsProcessing(true);
 
-    // Simulate parsing data
-    const mockData = Array.from({ length: 25 }, (_, i) => ({
-      id: i + 1,
-      row: `Data row ${i + 1}`
-    }));
+    const validation = await validateAndParseFile(file);
+    
+    if (!validation.success) {
+      toast({ 
+        title: "Validation Failed", 
+        description: validation.error, 
+        variant: "destructive" 
+      });
+      setIsProcessing(false);
+      return;
+    }
 
-    submitTask(task.id, file.name, mockData);
+    submitTask(task.id, file.name, validation.data!);
     toast({ 
       title: "Task Submitted", 
-      description: `Successfully uploaded ${file.name} with ${mockData.length} rows.` 
+      description: `Successfully uploaded ${file.name} with ${validation.data!.length} rows.` 
     });
+    setIsProcessing(false);
     setLocation("/dashboard");
   };
 
@@ -115,14 +165,26 @@ export default function TaskDetail() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="bg-slate-50 p-4 rounded-lg border">
-                  <h4 className="font-semibold mb-2 flex items-center gap-2 text-slate-700">
-                    <FileText className="h-4 w-4" /> Required Columns
-                  </h4>
-                  <div className="flex flex-wrap gap-2">
-                    {task.dataFields.map(f => (
-                      <span key={f} className="bg-white border px-2 py-1 rounded text-sm font-mono text-slate-600">{f}</span>
-                    ))}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-slate-50 p-4 rounded-lg border">
+                    <h4 className="font-semibold mb-2 flex items-center gap-2 text-slate-700">
+                      <FileText className="h-4 w-4" /> Required Columns
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {task.dataFields.map(f => (
+                        <span key={f} className="bg-white border px-2 py-1 rounded text-sm font-mono text-slate-600">{f}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="bg-slate-50 p-4 rounded-lg border">
+                    <h4 className="font-semibold mb-2 flex items-center gap-2 text-slate-700">
+                      <ListChecks className="h-4 w-4" /> Task Limits
+                    </h4>
+                    <ul className="text-sm text-slate-600 space-y-1">
+                      <li>• Max Rows: <strong>{task.maxRows}</strong></li>
+                      <li>• Max Size: <strong>5MB</strong></li>
+                      <li>• Accepted: <strong>CSV, XLSX</strong></li>
+                    </ul>
                   </div>
                 </div>
 
@@ -138,7 +200,7 @@ export default function TaskDetail() {
                   <Alert className="bg-blue-50 border-blue-100 text-blue-800">
                     <CheckCircle2 className="h-4 w-4 text-primary" />
                     <AlertTitle className="font-bold">Under Review</AlertTitle>
-                    <AlertDescription>Your submission is being reviewed by the admin team. You will be notified once it is processed.</AlertDescription>
+                    <AlertDescription>Your submission is being reviewed. Duplicate uploads are disabled while review is pending.</AlertDescription>
                   </Alert>
                 )}
               </CardContent>
@@ -158,14 +220,7 @@ export default function TaskDetail() {
                   onClick={() => canSubmit && fileInputRef.current?.click()}
                   style={{ cursor: canSubmit ? 'pointer' : 'not-allowed' }}
                 >
-                  <input 
-                    type="file" 
-                    ref={fileInputRef} 
-                    className="hidden" 
-                    onChange={handleFileChange} 
-                    accept=".csv,.xlsx"
-                    disabled={!canSubmit}
-                  />
+                  <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} accept=".csv,.xlsx" disabled={!canSubmit || isProcessing} />
                   {file ? (
                     <div className="space-y-2">
                       <FileText className="h-8 w-8 mx-auto text-primary" />
@@ -182,12 +237,8 @@ export default function TaskDetail() {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button 
-                  className="w-full font-bold shadow-lg shadow-primary/20" 
-                  disabled={!file || !canSubmit}
-                  onClick={handleUpload}
-                >
-                  Submit for Approval
+                <Button className="w-full font-bold shadow-lg shadow-primary/20" disabled={!file || !canSubmit || isProcessing} onClick={handleUpload}>
+                  {isProcessing ? "Validating..." : "Submit for Approval"}
                 </Button>
               </CardFooter>
             </Card>
