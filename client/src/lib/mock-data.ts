@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
-// Types
+// --- DATA MODELS (Logical Separation) ---
+
 export interface User {
   id: string;
   name: string;
@@ -15,16 +16,16 @@ export interface Task {
   description: string;
   payPerRow: number;
   status: "open" | "assigned" | "submitted" | "approved" | "rejected";
-  assignedTo?: string; // worker id
-  dataFields: string[]; // Required columns for validation
-  maxRows: number; // Configurable max rows per task
+  assignedTo?: string; // Reference to User.id
+  dataFields: string[];
+  maxRows: number;
   createdAt: string;
 }
 
 export interface Submission {
   id: string;
-  taskId: string;
-  workerId: string;
+  taskId: string; // Reference to Task.id
+  workerId: string; // Reference to User.id
   submittedAt: string;
   fileName: string;
   rowCount: number;
@@ -33,9 +34,18 @@ export interface Submission {
   rejectionReason?: string;
 }
 
+export interface Earning {
+  id: string;
+  submissionId: string; // Reference to Submission.id
+  workerId: string; // Reference to User.id
+  amount: number;
+  createdAt: string;
+}
+
 export interface Payout {
   id: string;
-  workerId: string;
+  workerId: string; // Reference to User.id
+  earningIds: string[]; // Reference to Earning.ids included in this payout
   amount: number;
   status: "pending" | "paid";
   createdAt: string;
@@ -44,15 +54,17 @@ export interface Payout {
 
 export interface Notification {
   id: string;
-  userId: string;
+  userId: string; // Reference to User.id
   title: string;
   message: string;
   type: "info" | "success" | "warning";
+  relatedId?: string; // Reference to Task, Submission, or Payout
   read: boolean;
   createdAt: string;
 }
 
-// Mock Data Store
+// --- MOCK DATA ---
+
 export const MOCK_USERS: User[] = [
   { id: "u1", name: "Admin User", email: "admin@dataentry.pro", role: "admin", balance: 0 },
   { id: "u2", name: "Sarah Worker", email: "sarah@worker.com", role: "worker", balance: 125.50 },
@@ -83,31 +95,44 @@ export const MOCK_TASKS: Task[] = [
   }
 ];
 
-// Zustand Store for simple state management in mockup
+// --- APP STATE ---
+
 interface AppState {
   currentUser: User | null;
   tasks: Task[];
   submissions: Submission[];
+  earnings: Earning[];
   payouts: Payout[];
   notifications: Notification[];
+  
+  // Auth
   login: (email: string, role: "admin" | "worker") => void;
   logout: () => void;
+  
+  // Task Management
   addTask: (task: Omit<Task, "id" | "createdAt" | "status">) => void;
   assignTask: (taskId: string, workerId: string) => void;
+  
+  // Submission & Earnings
   submitTask: (taskId: string, fileName: string, data: any[]) => void;
   reviewSubmission: (submissionId: string, status: "approved" | "rejected", reason?: string) => void;
+  
+  // Payouts
   markAsPaid: (payoutId: string) => void;
+  
+  // Notifications
   markNotificationRead: (id: string) => void;
-  addNotification: (userId: string, title: string, message: string, type: Notification["type"]) => void;
+  addNotification: (userId: string, title: string, message: string, type: Notification["type"], relatedId?: string) => void;
 }
 
 export const useStore = create<AppState>((set, get) => ({
-  currentUser: MOCK_USERS[1], // Sarah Worker
+  currentUser: MOCK_USERS[1], // Default for demo
   tasks: MOCK_TASKS,
   submissions: [],
+  earnings: [],
   payouts: [
-    { id: "p1", workerId: "u2", amount: 50.00, status: "paid", createdAt: "2024-02-01T10:00:00Z", paidAt: "2024-02-02T14:00:00Z" },
-    { id: "p2", workerId: "u2", amount: 75.50, status: "pending", createdAt: "2024-02-14T09:00:00Z" }
+    { id: "p1", workerId: "u2", earningIds: [], amount: 50.00, status: "paid", createdAt: "2024-02-01T10:00:00Z", paidAt: "2024-02-02T14:00:00Z" },
+    { id: "p2", workerId: "u2", earningIds: [], amount: 75.50, status: "pending", createdAt: "2024-02-14T09:00:00Z" }
   ],
   notifications: [
     { id: "n1", userId: "u2", title: "Welcome!", message: "Thanks for joining DataEntry Pro.", type: "info", read: false, createdAt: new Date().toISOString() }
@@ -136,7 +161,6 @@ export const useStore = create<AppState>((set, get) => ({
 
   assignTask: (taskId, workerId) => {
     const { currentUser } = get();
-    // Worker can only assign to themselves, admin can assign to anyone
     if (currentUser?.role !== 'admin' && currentUser?.id !== workerId) return;
     set((state) => ({
       tasks: state.tasks.map(t => t.id === taskId ? { ...t, status: "assigned", assignedTo: workerId } : t)
@@ -145,9 +169,7 @@ export const useStore = create<AppState>((set, get) => ({
 
   submitTask: (taskId, fileName, data) => set((state) => {
     const task = state.tasks.find(t => t.id === taskId);
-    if (!task || !state.currentUser) return state;
-    if (task.assignedTo !== state.currentUser.id) return state;
-    // Extra guard against duplicate active submissions
+    if (!task || !state.currentUser || task.assignedTo !== state.currentUser.id) return state;
     if (task.status === 'submitted' || task.status === 'approved') return state;
 
     const newSubmission: Submission = {
@@ -176,41 +198,59 @@ export const useStore = create<AppState>((set, get) => ({
     const task = state.tasks.find(t => t.id === submission.taskId);
     if (!task) return state;
 
-    const earnings = status === "approved" ? submission.rowCount * task.payPerRow : 0;
+    let newEarnings = [...state.earnings];
+    let newPayouts = [...state.payouts];
+    let newBalance = state.currentUser?.id === submission.workerId ? state.currentUser.balance : 0; // Simplified for mockup
     
-    const newNotifications: Notification[] = [...state.notifications, {
+    const earningAmount = status === "approved" ? submission.rowCount * task.payPerRow : 0;
+
+    if (status === "approved") {
+      const earningId = Math.random().toString(36).substr(2, 9);
+      const earning: Earning = {
+        id: earningId,
+        submissionId: submission.id,
+        workerId: submission.workerId,
+        amount: earningAmount,
+        createdAt: new Date().toISOString()
+      };
+      newEarnings.push(earning);
+
+      const payoutId = Math.random().toString(36).substr(2, 9);
+      newPayouts.push({
+        id: payoutId,
+        workerId: submission.workerId,
+        earningIds: [earningId],
+        amount: earningAmount,
+        status: "pending",
+        createdAt: new Date().toISOString()
+      });
+      
+      // If the worker is currently logged in, update their local balance for immediate UI feedback
+      if (state.currentUser?.id === submission.workerId) {
+        newBalance = state.currentUser.balance + earningAmount;
+      }
+    }
+    
+    const notification: Notification = {
       id: Math.random().toString(36).substr(2, 9),
       userId: submission.workerId,
       title: status === "approved" ? "Task Approved!" : "Task Rejected",
       message: status === "approved" 
-        ? `Your submission for "${task.title}" was approved. $${earnings.toFixed(2)} added to pending.`
+        ? `Your submission for "${task.title}" was approved. $${earningAmount.toFixed(2)} added to pending payouts.`
         : `Your submission for "${task.title}" was rejected. Reason: ${reason || "No reason provided."}`,
       type: status === "approved" ? "success" : "warning",
+      relatedId: submission.id,
       read: false,
       createdAt: new Date().toISOString()
-    }];
-
-    const newPayouts = status === "approved" ? [...state.payouts, {
-      id: Math.random().toString(36).substr(2, 9),
-      workerId: submission.workerId,
-      amount: earnings,
-      status: "pending" as const,
-      createdAt: new Date().toISOString()
-    }] : state.payouts;
+    };
 
     return {
-      notifications: newNotifications,
+      earnings: newEarnings,
       payouts: newPayouts,
-      submissions: state.submissions.map(s => 
-        s.id === submissionId ? { ...s, status, rejectionReason: reason } : s
-      ),
-      tasks: state.tasks.map(t => 
-        t.id === submission.taskId ? { ...t, status: status === "approved" ? "approved" : "rejected" } : t
-      ),
-      // Update balance for the worker if they happen to be the logged in user
-      currentUser: state.currentUser?.id === submission.workerId 
-        ? { ...state.currentUser, balance: state.currentUser.balance + earnings }
-        : state.currentUser
+      notifications: [...state.notifications, notification],
+      submissions: state.submissions.map(s => s.id === submissionId ? { ...s, status, rejectionReason: reason } : s),
+      tasks: state.tasks.map(t => t.id === submission.taskId ? { ...t, status: status === "approved" ? "approved" : "rejected" } : t),
+      currentUser: state.currentUser?.id === submission.workerId ? { ...state.currentUser, balance: newBalance } : state.currentUser
     };
   }),
 
@@ -220,45 +260,37 @@ export const useStore = create<AppState>((set, get) => ({
     const payout = state.payouts.find(p => p.id === payoutId);
     if (!payout) return state;
 
-    const newNotifications: Notification[] = [...state.notifications, {
+    const notification: Notification = {
       id: Math.random().toString(36).substr(2, 9),
       userId: payout.workerId,
       title: "Payout Released",
       message: `Your payout of $${payout.amount.toFixed(2)} has been marked as paid.`,
       type: "success",
+      relatedId: payout.id,
       read: false,
       createdAt: new Date().toISOString()
-    }];
+    };
 
     return {
-      payouts: state.payouts.map(p => 
-        p.id === payoutId ? { ...p, status: "paid", paidAt: new Date().toISOString() } : p
-      ),
-      notifications: newNotifications
+      payouts: state.payouts.map(p => p.id === payoutId ? { ...p, status: "paid", paidAt: new Date().toISOString() } : p),
+      notifications: [...state.notifications, notification]
     };
   }),
 
-  markNotificationRead: (id) => set((state) => {
-    const notification = state.notifications.find(n => n.id === id);
-    if (notification?.userId !== state.currentUser?.id) return state;
-    return {
-      notifications: state.notifications.map(n => n.id === id ? { ...n, read: true } : n)
-    };
-  }),
+  markNotificationRead: (id) => set((state) => ({
+    notifications: state.notifications.map(n => n.id === id ? { ...n, read: true } : n)
+  })),
 
-  addNotification: (userId, title, message, type) => set((state) => {
-    const { currentUser } = get();
-    if (currentUser?.role !== 'admin' && currentUser?.id !== userId) return state;
-    return {
-      notifications: [...state.notifications, {
-        id: Math.random().toString(36).substr(2, 9),
-        userId,
-        title,
-        message,
-        type,
-        read: false,
-        createdAt: new Date().toISOString()
-      }]
-    };
-  })
+  addNotification: (userId, title, message, type, relatedId) => set((state) => ({
+    notifications: [...state.notifications, {
+      id: Math.random().toString(36).substr(2, 9),
+      userId,
+      title,
+      message,
+      type,
+      relatedId,
+      read: false,
+      createdAt: new Date().toISOString()
+    }]
+  }))
 }));
