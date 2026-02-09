@@ -1,5 +1,6 @@
 import { useParams, useLocation } from "wouter";
 import { useStore } from "@/lib/mock-data";
+import { CONFIG } from "@/lib/config";
 import { Layout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -100,13 +101,13 @@ export default function TaskDetail() {
     if (!selectedFile) return;
 
     const ext = selectedFile.name.split('.').pop()?.toLowerCase();
-    if (ext !== 'csv' && ext !== 'xlsx') {
-      toast({ title: "Invalid file type", description: "Only CSV and XLSX files are allowed.", variant: "destructive" });
+    if (!CONFIG.ALLOWED_EXTENSIONS.includes(ext || "")) {
+      toast({ title: "Invalid file type", description: `Allowed types: ${CONFIG.ALLOWED_EXTENSIONS.join(", ").toUpperCase()}`, variant: "destructive" });
       return;
     }
 
-    if (selectedFile.size > 5 * 1024 * 1024) {
-      toast({ title: "File too large", description: "Maximum file size is 5MB.", variant: "destructive" });
+    if (selectedFile.size > CONFIG.MAX_FILE_SIZE_MB * 1024 * 1024) {
+      toast({ title: "File too large", description: `Maximum file size is ${CONFIG.MAX_FILE_SIZE_MB}MB.`, variant: "destructive" });
       return;
     }
 
@@ -182,8 +183,8 @@ export default function TaskDetail() {
                     </h4>
                     <ul className="text-sm text-slate-600 space-y-1">
                       <li>• Max Rows: <strong>{task.maxRows}</strong></li>
-                      <li>• Max Size: <strong>5MB</strong></li>
-                      <li>• Accepted: <strong>CSV, XLSX</strong></li>
+                      <li>• Max Size: <strong>{CONFIG.MAX_FILE_SIZE_MB}MB</strong></li>
+                      <li>• Accepted: <strong>{CONFIG.ALLOWED_EXTENSIONS.join(", ").toUpperCase()}</strong></li>
                     </ul>
                   </div>
                 </div>

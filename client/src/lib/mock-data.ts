@@ -1,6 +1,8 @@
 import { create } from "zustand";
+import { CONFIG } from "./config";
 
 // --- DATA MODELS (Logical Separation) ---
+// These interfaces represent the "Schema" of our application.
 
 export interface User {
   id: string;
@@ -79,7 +81,7 @@ export const MOCK_TASKS: Task[] = [
     payPerRow: 0.25, 
     status: "open", 
     dataFields: ["Invoice Number", "Date", "Amount"], 
-    maxRows: 100,
+    maxRows: CONFIG.DEFAULT_MAX_ROWS,
     createdAt: "2024-02-10T10:00:00Z" 
   },
   { 
@@ -95,7 +97,8 @@ export const MOCK_TASKS: Task[] = [
   }
 ];
 
-// --- APP STATE ---
+// --- APP STATE (The "Backend" of the Mockup) ---
+// Note: In a production app, these functions would be API calls (GET/POST) to the server.
 
 interface AppState {
   currentUser: User | null;
@@ -105,28 +108,28 @@ interface AppState {
   payouts: Payout[];
   notifications: Notification[];
   
-  // Auth
+  // Auth Logic (Server-side simulation)
   login: (email: string, role: "admin" | "worker") => void;
   logout: () => void;
   
-  // Task Management
+  // Task Management (Admin-only logic)
   addTask: (task: Omit<Task, "id" | "createdAt" | "status">) => void;
   assignTask: (taskId: string, workerId: string) => void;
   
-  // Submission & Earnings
+  // Submission & Earnings (Financial integrity logic)
   submitTask: (taskId: string, fileName: string, data: any[]) => void;
   reviewSubmission: (submissionId: string, status: "approved" | "rejected", reason?: string) => void;
   
-  // Payouts
+  // Payouts (Treasury simulation)
   markAsPaid: (payoutId: string) => void;
   
-  // Notifications
+  // Notifications (Event bus simulation)
   markNotificationRead: (id: string) => void;
   addNotification: (userId: string, title: string, message: string, type: Notification["type"], relatedId?: string) => void;
 }
 
 export const useStore = create<AppState>((set, get) => ({
-  currentUser: MOCK_USERS[1], // Default for demo
+  currentUser: MOCK_USERS[1], 
   tasks: MOCK_TASKS,
   submissions: [],
   earnings: [],
@@ -135,7 +138,7 @@ export const useStore = create<AppState>((set, get) => ({
     { id: "p2", workerId: "u2", earningIds: [], amount: 75.50, status: "pending", createdAt: "2024-02-14T09:00:00Z" }
   ],
   notifications: [
-    { id: "n1", userId: "u2", title: "Welcome!", message: "Thanks for joining DataEntry Pro.", type: "info", read: false, createdAt: new Date().toISOString() }
+    { id: "n1", userId: "u2", title: "Welcome!", message: `Thanks for joining ${CONFIG.APP_NAME}.`, type: "info", read: false, createdAt: new Date().toISOString() }
   ],
   
   login: (email, role) => {
@@ -148,6 +151,7 @@ export const useStore = create<AppState>((set, get) => ({
 
   addTask: (taskData) => {
     const { currentUser } = get();
+    // Security check: Only admins can create tasks
     if (currentUser?.role !== 'admin') return;
     set((state) => ({
       tasks: [...state.tasks, { 
@@ -161,6 +165,7 @@ export const useStore = create<AppState>((set, get) => ({
 
   assignTask: (taskId, workerId) => {
     const { currentUser } = get();
+    // Security check: Role-based assignment permission
     if (currentUser?.role !== 'admin' && currentUser?.id !== workerId) return;
     set((state) => ({
       tasks: state.tasks.map(t => t.id === taskId ? { ...t, status: "assigned", assignedTo: workerId } : t)
@@ -169,7 +174,9 @@ export const useStore = create<AppState>((set, get) => ({
 
   submitTask: (taskId, fileName, data) => set((state) => {
     const task = state.tasks.find(t => t.id === taskId);
+    // Validation check: Ensure task exists and is assigned to the worker
     if (!task || !state.currentUser || task.assignedTo !== state.currentUser.id) return state;
+    // Integrity check: Prevent double submissions
     if (task.status === 'submitted' || task.status === 'approved') return state;
 
     const newSubmission: Submission = {
@@ -190,6 +197,7 @@ export const useStore = create<AppState>((set, get) => ({
   }),
 
   reviewSubmission: (submissionId, status, reason) => set((state) => {
+    // Security check: Admin only
     if (state.currentUser?.role !== 'admin') return state;
     
     const submission = state.submissions.find(s => s.id === submissionId);
@@ -200,8 +208,9 @@ export const useStore = create<AppState>((set, get) => ({
 
     let newEarnings = [...state.earnings];
     let newPayouts = [...state.payouts];
-    let newBalance = state.currentUser?.id === submission.workerId ? state.currentUser.balance : 0; // Simplified for mockup
+    let newBalance = state.currentUser?.id === submission.workerId ? state.currentUser.balance : 0;
     
+    // Financial calculation logic
     const earningAmount = status === "approved" ? submission.rowCount * task.payPerRow : 0;
 
     if (status === "approved") {
@@ -225,7 +234,6 @@ export const useStore = create<AppState>((set, get) => ({
         createdAt: new Date().toISOString()
       });
       
-      // If the worker is currently logged in, update their local balance for immediate UI feedback
       if (state.currentUser?.id === submission.workerId) {
         newBalance = state.currentUser.balance + earningAmount;
       }
@@ -255,6 +263,7 @@ export const useStore = create<AppState>((set, get) => ({
   }),
 
   markAsPaid: (payoutId) => set((state) => {
+    // Security check: Admin only
     if (state.currentUser?.role !== 'admin') return state;
     
     const payout = state.payouts.find(p => p.id === payoutId);

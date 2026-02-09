@@ -1,5 +1,6 @@
 import { Layout } from "@/components/layout";
 import { useStore, Submission, Payout } from "@/lib/mock-data";
+import { CONFIG } from "@/lib/config";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -32,7 +33,7 @@ export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [newTask, setNewTask] = useState({ title: "", description: "", payPerRow: "0.10", dataFields: "", maxRows: "100" });
+  const [newTask, setNewTask] = useState({ title: "", description: "", payPerRow: "0.10", dataFields: "", maxRows: CONFIG.DEFAULT_MAX_ROWS.toString() });
 
   const [reviewSub, setReviewSub] = useState<Submission | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
