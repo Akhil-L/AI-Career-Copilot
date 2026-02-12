@@ -13,20 +13,25 @@ import {
   ChevronRight, 
   GraduationCap,
   Trophy,
-  AlertCircle
+  AlertCircle,
+  XCircle,
+  HelpCircle,
+  ShieldCheck
 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 
 export default function TrainingPage() {
-  const { currentUser, completeModule } = useStore();
+  const { currentUser, completeModule, registerAttempt } = useStore();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   
   const [activeModule, setActiveModule] = useState<TrainingModule | null>(null);
-  const [quizAnswer, setQuizAnswer] = useState<string | null>(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
   const [showQuiz, setShowQuiz] = useState(false);
+  const [quizResults, setQuizResults] = useState<{ score: number; passed: boolean } | null>(null);
 
   if (!currentUser || currentUser.role !== "worker") {
     return (
@@ -47,34 +52,45 @@ export default function TrainingPage() {
   const handleStartModule = (module: TrainingModule) => {
     setActiveModule(module);
     setShowQuiz(false);
-    setQuizAnswer(null);
-  };
-
-  const handleFinishReading = () => {
-    setShowQuiz(true);
+    setCurrentQuestionIndex(0);
+    setUserAnswers({});
+    setQuizResults(null);
   };
 
   const handleQuizSubmit = () => {
-    if (quizAnswer === null || !activeModule) return;
+    if (!activeModule) return;
     
-    const answerIndex = parseInt(quizAnswer);
-    if (answerIndex === activeModule.quiz.correctAnswer) {
+    let correctCount = 0;
+    activeModule.quiz.forEach((q, idx) => {
+      if (parseInt(userAnswers[idx]) === q.correctAnswer) {
+        correctCount++;
+      }
+    });
+
+    const score = correctCount / activeModule.quiz.length;
+    const passed = score >= activeModule.passingScore;
+
+    registerAttempt(activeModule.id);
+    setQuizResults({ score, passed });
+
+    if (passed) {
       completeModule(activeModule.id);
       toast({
-        title: "Module Completed!",
-        description: "You've passed the quiz. Keep going!",
+        title: "Module Passed!",
+        description: `Score: ${Math.round(score * 100)}%. Module completed.`,
         className: "bg-emerald-600 text-white border-emerald-700"
       });
-      setActiveModule(null);
-      setShowQuiz(false);
     } else {
       toast({
-        title: "Incorrect Answer",
-        description: "Review the lesson content and try again.",
+        title: "Module Failed",
+        description: `Score: ${Math.round(score * 100)}%. Required: ${Math.round(activeModule.passingScore * 100)}%.`,
         variant: "destructive"
       });
     }
   };
+
+  const currentAttempts = currentUser.moduleAttempts[activeModule?.id || ""] || 0;
+  const isOutOfAttempts = activeModule && currentAttempts >= activeModule.maxAttempts && !currentUser.completedModules.includes(activeModule.id);
 
   return (
     <Layout>
@@ -82,16 +98,16 @@ export default function TrainingPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="space-y-2">
             <h1 className="text-3xl font-heading font-bold text-slate-900 flex items-center gap-3">
-              <GraduationCap className="h-8 w-8 text-primary" />
-              Worker Training Academy
+              <ShieldCheck className="h-8 w-8 text-primary" />
+              Advanced Academy
             </h1>
-            <p className="text-slate-500">Complete all modules to unlock task assignments and start earning.</p>
+            <p className="text-slate-500">Master data auditing and ethical handling to unlock work.</p>
           </div>
-          <Card className="bg-slate-50 border-slate-200 w-full md:w-64">
+          <Card className="bg-slate-50 border-slate-200 w-full md:w-64 shadow-sm">
             <CardContent className="p-4">
               <div className="flex justify-between text-xs font-bold uppercase text-slate-500 mb-2">
-                <span>Your Progress</span>
-                <span>{completedCount}/{TRAINING_MODULES.length} Modules</span>
+                <span>Certification Progress</span>
+                <span>{Math.round(progressPercent)}%</span>
               </div>
               <Progress value={progressPercent} className="h-2" />
             </CardContent>
@@ -104,73 +120,145 @@ export default function TrainingPage() {
               <Trophy className="h-10 w-10" />
             </div>
             <div className="flex-1 text-center md:text-left">
-              <h3 className="text-xl font-bold text-emerald-900">Training Fully Completed!</h3>
-              <p className="text-emerald-700">You are now a certified DataEntry Pro worker. Go to your dashboard to browse available tasks.</p>
+              <h3 className="text-xl font-bold text-emerald-900">Certified Auditor!</h3>
+              <p className="text-emerald-700">You've completed the advanced curriculum. Your high accuracy score is now recognized.</p>
             </div>
-            <Button onClick={() => setLocation("/dashboard")} className="bg-emerald-600 hover:bg-emerald-500 font-bold px-8 h-12">
-              Start Working Now
+            <Button onClick={() => setLocation("/dashboard")} className="bg-emerald-600 hover:bg-emerald-500 font-bold px-8 h-12 shadow-lg shadow-emerald-200">
+              Unlock Tasks
             </Button>
           </div>
         )}
 
         {activeModule ? (
           <div className="grid md:grid-cols-3 gap-8 items-start animate-in slide-in-from-bottom-4">
-            <Card className="md:col-span-2 border-primary/20 shadow-xl overflow-hidden">
+            <Card className="md:col-span-2 border-primary/20 shadow-xl overflow-hidden bg-white">
               <CardHeader className="bg-slate-50 border-b">
                 <div className="flex justify-between items-center mb-2">
-                  <Badge variant="outline" className="text-primary border-primary/20">Active Lesson</Badge>
-                  <Button variant="ghost" size="sm" onClick={() => setActiveModule(null)}>Cancel Lesson</Button>
+                  <Badge variant="outline" className="text-primary border-primary/20">Module {TRAINING_MODULES.indexOf(activeModule) + 1}</Badge>
+                  <Button variant="ghost" size="sm" onClick={() => setActiveModule(null)}>Exit Module</Button>
                 </div>
                 <CardTitle className="text-2xl font-heading">{activeModule.title}</CardTitle>
-              </CardHeader>
-              <CardContent className="py-8 prose prose-slate max-w-none">
-                <div className="text-lg leading-relaxed text-slate-700 space-y-4">
-                  {activeModule.content.split('\n').map((para, i) => (
-                    <p key={i}>{para}</p>
-                  ))}
+                <div className="flex gap-4 text-xs font-medium text-slate-500">
+                  <span className="flex items-center gap-1"><Trophy className="h-3 w-3" /> Passing Score: {Math.round(activeModule.passingScore * 100)}%</span>
+                  <span className="flex items-center gap-1"><AlertCircle className="h-3 w-3" /> Attempts Used: {currentAttempts}/{activeModule.maxAttempts}</span>
                 </div>
-              </CardContent>
-              <CardFooter className="bg-slate-50 border-t p-6 flex justify-end">
-                {!showQuiz ? (
-                  <Button onClick={handleFinishReading} className="gap-2 h-12 px-8 font-bold">
-                    I've Read the Lesson <ChevronRight className="h-4 w-4" />
-                  </Button>
-                ) : (
-                  <div className="w-full space-y-6">
-                    <div className="p-6 bg-white border-2 border-primary/10 rounded-xl space-y-6">
-                      <h4 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                        <BookOpen className="h-5 w-5 text-primary" />
-                        Final Quiz: Check Your Understanding
-                      </h4>
-                      <div className="space-y-4">
-                        <p className="font-semibold text-slate-700">{activeModule.quiz.question}</p>
-                        <RadioGroup onValueChange={setQuizAnswer} value={quizAnswer || ""}>
-                          {activeModule.quiz.options.map((option, i) => (
-                            <div key={i} className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
-                              <RadioGroupItem value={i.toString()} id={`opt-${i}`} />
-                              <Label htmlFor={`opt-${i}`} className="flex-1 cursor-pointer font-medium">{option}</Label>
-                            </div>
-                          ))}
-                        </RadioGroup>
+              </CardHeader>
+              
+              {!showQuiz ? (
+                <>
+                  <CardContent className="py-8 prose prose-slate max-w-none">
+                    <div className="text-lg leading-relaxed text-slate-700 space-y-4">
+                      {activeModule.content.split('\n').map((para, i) => (
+                        <p key={i}>{para}</p>
+                      ))}
+                    </div>
+                  </CardContent>
+                  <CardFooter className="bg-slate-50 border-t p-6 flex justify-end">
+                    {isOutOfAttempts ? (
+                      <div className="flex items-center gap-2 text-red-600 font-bold bg-red-50 p-4 rounded-lg w-full">
+                        <XCircle className="h-5 w-5" /> Maximum attempts reached. Contact support to reset.
                       </div>
-                    </div>
-                    <div className="flex justify-end gap-3">
-                      <Button variant="outline" onClick={() => setShowQuiz(false)}>Go Back to Lesson</Button>
-                      <Button onClick={handleQuizSubmit} className="h-12 px-12 font-bold bg-primary hover:bg-primary/90" disabled={quizAnswer === null}>
-                        Submit Answer
+                    ) : (
+                      <Button onClick={() => setShowQuiz(true)} className="gap-2 h-12 px-8 font-bold shadow-lg shadow-primary/20">
+                        Start Practical Quiz <ChevronRight className="h-4 w-4" />
                       </Button>
-                    </div>
+                    )}
+                  </CardFooter>
+                </>
+              ) : quizResults ? (
+                <CardContent className="py-12 text-center space-y-6">
+                  <div className={`mx-auto p-6 rounded-full w-24 h-24 flex items-center justify-center ${quizResults.passed ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
+                    {quizResults.passed ? <CheckCircle2 className="h-12 w-12" /> : <XCircle className="h-12 w-12" />}
                   </div>
-                )}
-              </CardFooter>
+                  <div className="space-y-2">
+                    <h2 className="text-3xl font-bold">{quizResults.passed ? "Success!" : "Not Quite..."}</h2>
+                    <p className="text-slate-500 text-lg">Your score: {Math.round(quizResults.score * 100)}%</p>
+                  </div>
+                  
+                  <div className="max-w-md mx-auto space-y-4 text-left border rounded-xl p-4 bg-slate-50">
+                    <h4 className="font-bold text-sm uppercase text-slate-400">Review Feedback</h4>
+                    {activeModule.quiz.map((q, i) => (
+                      <div key={i} className="text-sm border-b pb-2 last:border-0">
+                        <p className="font-medium flex items-center gap-2">
+                          {parseInt(userAnswers[i]) === q.correctAnswer ? <CheckCircle2 className="h-3 w-3 text-emerald-500" /> : <XCircle className="h-3 w-3 text-red-500" />}
+                          {q.question}
+                        </p>
+                        <p className="text-slate-500 mt-1 italic">{q.explanation}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex justify-center gap-3">
+                    <Button variant="outline" onClick={() => handleStartModule(activeModule)}>
+                      {quizResults.passed ? "Review Lesson" : "Retry Lesson"}
+                    </Button>
+                    {quizResults.passed && (
+                      <Button onClick={() => setActiveModule(null)}>Back to Modules</Button>
+                    )}
+                  </div>
+                </CardContent>
+              ) : (
+                <>
+                  <CardContent className="py-8 space-y-8">
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center text-xs font-bold text-slate-400 uppercase tracking-widest">
+                        <span>Question {currentQuestionIndex + 1} of {activeModule.quiz.length}</span>
+                        <HelpCircle className="h-4 w-4" />
+                      </div>
+                      <h4 className="text-xl font-bold text-slate-900">{activeModule.quiz[currentQuestionIndex].question}</h4>
+                      <RadioGroup 
+                        onValueChange={(val) => setUserAnswers({...userAnswers, [currentQuestionIndex]: val})} 
+                        value={userAnswers[currentQuestionIndex] || ""}
+                        className="space-y-3"
+                      >
+                        {activeModule.quiz[currentQuestionIndex].options.map((option, i) => (
+                          <div key={i} className={`flex items-center space-x-3 p-4 border rounded-xl hover:bg-slate-50 transition-all ${userAnswers[currentQuestionIndex] === i.toString() ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'bg-white'}`}>
+                            <RadioGroupItem value={i.toString()} id={`opt-${i}`} />
+                            <Label htmlFor={`opt-${i}`} className="flex-1 cursor-pointer font-medium text-lg">{option}</Label>
+                          </div>
+                        ))}
+                      </RadioGroup>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="bg-slate-50 border-t p-6 flex justify-between">
+                    <Button 
+                      variant="ghost" 
+                      onClick={() => setCurrentQuestionIndex(prev => prev - 1)} 
+                      disabled={currentQuestionIndex === 0}
+                    >
+                      Previous
+                    </Button>
+                    {currentQuestionIndex < activeModule.quiz.length - 1 ? (
+                      <Button 
+                        onClick={() => setCurrentQuestionIndex(prev => prev + 1)}
+                        disabled={!userAnswers[currentQuestionIndex]}
+                      >
+                        Next Question
+                      </Button>
+                    ) : (
+                      <Button 
+                        onClick={handleQuizSubmit} 
+                        className="bg-primary hover:bg-primary/90 font-bold px-8 h-12"
+                        disabled={Object.keys(userAnswers).length < activeModule.quiz.length}
+                      >
+                        Finish & Submit
+                      </Button>
+                    )}
+                  </CardFooter>
+                </>
+              )}
             </Card>
             <div className="space-y-4">
-              <h3 className="font-bold text-slate-900 px-1 uppercase text-xs tracking-widest">Academy Curriculum</h3>
-              {TRAINING_MODULES.map((m) => (
-                <Card key={m.id} className={`p-4 ${m.id === activeModule.id ? 'border-primary ring-1 ring-primary' : 'opacity-60 grayscale'}`}>
+              <h3 className="font-bold text-slate-900 px-1 uppercase text-xs tracking-widest">Curriculum Details</h3>
+              {TRAINING_MODULES.map((m, idx) => (
+                <Card key={m.id} className={`p-4 ${m.id === activeModule.id ? 'border-primary ring-1 ring-primary' : 'opacity-60 grayscale bg-slate-50'}`}>
                   <div className="flex gap-3">
                     <div className="mt-0.5">
-                      <CheckCircle2 className={`h-4 w-4 ${m.id === activeModule.id ? 'text-primary' : 'text-slate-300'}`} />
+                      {currentUser.completedModules.includes(m.id) ? (
+                        <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                      ) : (
+                        <div className="h-4 w-4 rounded-full border-2 border-slate-300" />
+                      )}
                     </div>
                     <div className="space-y-1">
                       <p className="text-sm font-bold">{m.title}</p>
@@ -185,41 +273,49 @@ export default function TrainingPage() {
             {TRAINING_MODULES.map((module, index) => {
               const isCompleted = currentUser.completedModules.includes(module.id);
               const isLocked = index > 0 && !currentUser.completedModules.includes(TRAINING_MODULES[index - 1].id);
+              const attempts = currentUser.moduleAttempts[module.id] || 0;
               
               return (
                 <Card 
                   key={module.id} 
-                  className={`flex flex-col h-full transition-all duration-300 ${isLocked ? 'opacity-70 bg-slate-50' : 'hover:shadow-lg hover:-translate-y-1'}`}
+                  className={`flex flex-col h-full transition-all duration-300 border-slate-200 bg-white ${isLocked ? 'opacity-70 bg-slate-50 shadow-none' : 'hover:shadow-xl hover:border-primary/20'}`}
                 >
                   <CardHeader>
                     <div className="flex justify-between items-start mb-2">
-                      <div className={`p-2 rounded-lg ${isCompleted ? 'bg-emerald-100 text-emerald-600' : isLocked ? 'bg-slate-200 text-slate-500' : 'bg-blue-100 text-blue-600'}`}>
-                        {isCompleted ? <CheckCircle2 className="h-5 w-5" /> : isLocked ? <Lock className="h-5 w-5" /> : <BookOpen className="h-5 w-5" />}
+                      <div className={`p-2.5 rounded-xl ${isCompleted ? 'bg-emerald-50 text-emerald-600' : isLocked ? 'bg-slate-100 text-slate-400' : 'bg-blue-50 text-blue-600'}`}>
+                        {isCompleted ? <CheckCircle2 className="h-6 w-6" /> : isLocked ? <Lock className="h-6 w-6" /> : <GraduationCap className="h-6 w-6" />}
                       </div>
-                      {isCompleted && <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">Completed</Badge>}
+                      <div className="flex flex-col items-end gap-1">
+                        {isCompleted && <Badge className="bg-emerald-500 text-white border-0">Passed</Badge>}
+                        {!isCompleted && !isLocked && attempts > 0 && <Badge variant="outline" className="text-[10px]">{attempts}/{module.maxAttempts} Tries</Badge>}
+                      </div>
                     </div>
-                    <CardTitle className="text-lg">{module.title}</CardTitle>
-                    <CardDescription>{module.description}</CardDescription>
+                    <CardTitle className="text-xl font-heading">{module.title}</CardTitle>
+                    <CardDescription className="line-clamp-2">{module.description}</CardDescription>
                   </CardHeader>
                   <CardContent className="flex-1">
-                    {isLocked && (
-                      <div className="flex items-center gap-2 text-xs font-medium text-slate-400 mt-2">
-                        <Lock className="h-3 w-3" /> Complete "{TRAINING_MODULES[index-1].title}" to unlock
+                    {isLocked ? (
+                      <div className="flex items-center gap-2 text-xs font-bold text-slate-400 mt-2 uppercase tracking-tighter">
+                        <Lock className="h-3 w-3" /> Finish previous module
+                      </div>
+                    ) : (
+                      <div className="text-xs text-slate-500 font-medium">
+                        {module.quiz.length} Practical Questions • {Math.round(module.passingScore * 100)}% to pass
                       </div>
                     )}
                   </CardContent>
                   <CardFooter className="pt-0">
                     {isCompleted ? (
-                      <Button variant="outline" className="w-full h-11 border-emerald-200 text-emerald-600 hover:bg-emerald-50" onClick={() => handleStartModule(module)}>
-                        Review Lesson
+                      <Button variant="outline" className="w-full h-11 border-emerald-200 text-emerald-600 hover:bg-emerald-50 font-bold" onClick={() => handleStartModule(module)}>
+                        Review Content
                       </Button>
                     ) : isLocked ? (
-                      <Button disabled className="w-full h-11 bg-slate-200 text-slate-500">
+                      <Button disabled className="w-full h-11 bg-slate-100 text-slate-400 border-0">
                         Locked
                       </Button>
                     ) : (
-                      <Button className="w-full h-11 shadow-md" onClick={() => handleStartModule(module)}>
-                        Start Lesson
+                      <Button className="w-full h-11 bg-primary hover:bg-primary/90 font-bold shadow-md" onClick={() => handleStartModule(module)}>
+                        {attempts > 0 ? "Retry Certification" : "Begin Certification"}
                       </Button>
                     )}
                   </CardFooter>

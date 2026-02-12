@@ -10,6 +10,14 @@ export interface User {
   role: "admin" | "worker";
   balance: number;
   completedModules: string[]; // Track training progress
+  moduleAttempts: Record<string, number>; // moduleId -> attemptCount
+}
+
+export interface QuizQuestion {
+  question: string;
+  options: string[];
+  correctAnswer: number;
+  explanation: string;
 }
 
 export interface TrainingModule {
@@ -17,11 +25,9 @@ export interface TrainingModule {
   title: string;
   description: string;
   content: string;
-  quiz: {
-    question: string;
-    options: string[];
-    correctAnswer: number;
-  };
+  quiz: QuizQuestion[];
+  passingScore: number; // e.g., 0.8 for 80%
+  maxAttempts: number;
 }
 
 export interface Task {
@@ -82,56 +88,90 @@ export interface Notification {
 export const TRAINING_MODULES: TrainingModule[] = [
   {
     id: "m1",
-    title: "Intro to Data Entry",
-    description: "Learn the fundamentals of professional data entry.",
-    content: "Professional data entry is about speed and accuracy. At DataEntry Pro, we process thousands of records daily. Your role is to ensure that the digital records match the source material perfectly. Consistency in formatting is key to high-quality data.",
-    quiz: {
-      question: "What is the most important aspect of data entry at DataEntry Pro?",
-      options: ["Speed only", "Both speed and accuracy", "Using a fancy keyboard", "Working at night"],
-      correctAnswer: 1
-    }
+    title: "Intro to Data Entry & Accuracy Auditing",
+    description: "Fundamentals and quality control techniques.",
+    content: `Professional data entry is built on accuracy. 
+Accuracy Auditing: Always double-check your work before submission. A common technique is the "Scan & Verify" method: scan the source document, then verify the digital entry.
+Quality Control: Look for common typos like transposed numbers (123 vs 132) or misspellings in repetitive names. High accuracy ensures long-term platform access.`,
+    quiz: [
+      {
+        question: "What is the 'Scan & Verify' method?",
+        options: ["Scanning the file for viruses", "Scanning the source then verifying the entry", "Using a barcode scanner", "Quickly glancing at the headers"],
+        correctAnswer: 1,
+        explanation: "Scan & Verify involves looking at the original source material and confirming the digital entry matches it perfectly."
+      },
+      {
+        question: "Which of these is a 'transposed number' error?",
+        options: ["Entering 100 instead of 200", "Entering 'John' instead of 'Jon'", "Entering 1234 instead of 1243", "Leaving a field empty"],
+        correctAnswer: 2,
+        explanation: "Transposition occurs when two digits or characters are swapped accidentally."
+      }
+    ],
+    passingScore: 1.0,
+    maxAttempts: 3
   },
   {
     id: "m2",
-    title: "Platform Workflow",
-    description: "How to find and complete work.",
-    content: "Our workflow follows a simple cycle: 1. Browse Available Jobs. 2. Accept a Task (Assigned). 3. Perform the work and upload your file (Submitted). 4. Admin reviews your work (Approved/Rejected). Once approved, earnings are credited to your balance.",
-    quiz: {
-      question: "What is the status of a task after you upload your file?",
-      options: ["Open", "Assigned", "Submitted", "Paid"],
-      correctAnswer: 2
-    }
+    title: "Detecting Duplicates & Inconsistencies",
+    description: "Ensuring data integrity in bulk sets.",
+    content: `Data Integrity is vital. 
+Duplicates: Never upload the same record twice. Even if the source has duplicates, a professional auditor flags them.
+Inconsistencies: Watch for varied formats. Example: 'USA', 'U.S.A', and 'United States' should all be standardized to the format requested in the task instructions.
+Standardization: Follow the task guidelines strictly for dates (DD/MM/YYYY vs MM/DD/YYYY).`,
+    quiz: [
+      {
+        question: "How should you handle inconsistent country names like 'USA' and 'United States'?",
+        options: ["Leave them as they are", "Delete all of them", "Standardize them to the format in task instructions", "Choose whichever you like best"],
+        correctAnswer: 2,
+        explanation: "Standardization ensures data is usable and professional."
+      }
+    ],
+    passingScore: 1.0,
+    maxAttempts: 3
   },
   {
     id: "m3",
-    title: "Formatting & Validation",
-    description: "CSV and XLSX requirements.",
-    content: "We strictly accept CSV and XLSX files. Every task has 'Required Columns'. Your file MUST contain these headers exactly as spelled. Files missing headers or exceeding the row limit will be automatically rejected by our validation system.",
-    quiz: {
-      question: "Which file formats does the platform accept?",
-      options: [".txt and .doc", ".pdf and .jpg", ".csv and .xlsx", ".zip only"],
-      correctAnswer: 2
-    }
+    title: "Handling Messy or Unclear Data",
+    description: "Strategies for low-quality source material.",
+    content: `Unclear Source: If a handwritten scan is illegible, do not guess. Use the platform's 'Flag for Clarification' or follow specific task rules for 'N/A' entries.
+Incomplete Data: If a required field is missing in the source, check if there's a fallback instruction. If not, contact Admin before submitting a potentially invalid file.`,
+    quiz: [
+      {
+        question: "What should you do if a source scan is illegible?",
+        options: ["Make your best guess", "Leave it blank without checking rules", "Follow task rules for 'N/A' or flag it", "Skip the entire row"],
+        correctAnswer: 2,
+        explanation: "Guessing leads to data errors. Always follow specific fallback instructions provided by the Admin."
+      }
+    ],
+    passingScore: 1.0,
+    maxAttempts: 3
   },
   {
     id: "m4",
-    title: "Earnings & Payouts",
-    description: "Getting paid for your work.",
-    content: "You are paid per row of valid data. Earnings move to 'Pending' as soon as a submission is approved. Admins release payouts regularly. You can track your full history in the 'Payouts' section of your dashboard.",
-    quiz: {
-      question: "When are earnings added to your pending payouts?",
-      options: ["As soon as you upload", "After admin approval", "At the end of the month", "When you accept a task"],
-      correctAnswer: 1
-    }
+    title: "Data Privacy & Ethical Handling",
+    description: "Confidentiality and client information safety.",
+    content: `Privacy: You are handling sensitive client information. 
+Confidentiality: Never download, copy, or share client data outside the platform. 
+Ethical Handling: Treat every row as if it were your own personal information. Once a task is complete and approved, ensure any temporary local copies are deleted immediately.`,
+    quiz: [
+      {
+        question: "Is it acceptable to save a copy of client data for your personal records?",
+        options: ["Yes, for portfolio use", "Only if it doesn't contain names", "Never, it's a breach of confidentiality", "Only if the task is finished"],
+        correctAnswer: 2,
+        explanation: "Confidentiality is a legal and ethical requirement. Client data must never leave the secure platform environment."
+      }
+    ],
+    passingScore: 1.0,
+    maxAttempts: 3
   }
 ];
 
 // --- MOCK DATA ---
 
 export const MOCK_USERS: User[] = [
-  { id: "u1", name: "Admin User", email: "admin@dataentry.pro", role: "admin", balance: 0, completedModules: [] },
-  { id: "u2", name: "Sarah Worker", email: "sarah@worker.com", role: "worker", balance: 125.50, completedModules: ["m1"] },
-  { id: "u3", name: "John Data", email: "john@worker.com", role: "worker", balance: 45.00, completedModules: [] },
+  { id: "u1", name: "Admin User", email: "admin@dataentry.pro", role: "admin", balance: 0, completedModules: [], moduleAttempts: {} },
+  { id: "u2", name: "Sarah Worker", email: "sarah@worker.com", role: "worker", balance: 125.50, completedModules: ["m1"], moduleAttempts: { "m1": 1 } },
+  { id: "u3", name: "John Data", email: "john@worker.com", role: "worker", balance: 45.00, completedModules: [], moduleAttempts: {} },
 ];
 
 export const MOCK_TASKS: Task[] = [
@@ -171,6 +211,7 @@ interface AppState {
   login: (email: string, role: "admin" | "worker") => void;
   logout: () => void;
   
+  registerAttempt: (moduleId: string) => void;
   completeModule: (moduleId: string) => void;
   
   addTask: (task: Omit<Task, "id" | "createdAt" | "status">) => void;
@@ -197,11 +238,20 @@ export const useStore = create<AppState>((set, get) => ({
   
   login: (email, role) => {
     const user = MOCK_USERS.find(u => u.role === role) || 
-                { id: "new", name: "Demo User", email, role, balance: 0, completedModules: [] };
+                { id: "new", name: "Demo User", email, role, balance: 0, completedModules: [], moduleAttempts: {} };
     set({ currentUser: user });
   },
 
   logout: () => set({ currentUser: null }),
+
+  registerAttempt: (moduleId) => set((state) => {
+    if (!state.currentUser) return state;
+    const attempts = { ...state.currentUser.moduleAttempts };
+    attempts[moduleId] = (attempts[moduleId] || 0) + 1;
+    return {
+      currentUser: { ...state.currentUser, moduleAttempts: attempts }
+    };
+  }),
 
   completeModule: (moduleId) => set((state) => {
     if (!state.currentUser) return state;
