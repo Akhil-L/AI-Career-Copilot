@@ -9,6 +9,7 @@ import Auth from "@/pages/auth";
 import WorkerDashboard from "@/pages/dashboard-worker";
 import AdminDashboard from "@/pages/dashboard-admin";
 import TaskDetail from "@/pages/task-detail";
+import TrainingPage from "@/pages/training";
 import PayoutsPage from "@/pages/payouts-worker";
 
 function Router() {
@@ -19,6 +20,7 @@ function Router() {
       <Route path="/dashboard" component={WorkerDashboard} />
       <Route path="/payouts" component={PayoutsPage} />
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/training" component={TrainingPage} />
       <Route path="/task/:id" component={TaskDetail} />
       <Route component={NotFound} />
     </Switch>

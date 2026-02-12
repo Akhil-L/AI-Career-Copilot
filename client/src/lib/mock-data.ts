@@ -1,8 +1,7 @@
 import { create } from "zustand";
 import { CONFIG } from "./config";
 
-// --- DATA MODELS (Logical Separation) ---
-// These interfaces represent the "Schema" of our application.
+// --- DATA MODELS ---
 
 export interface User {
   id: string;
@@ -10,6 +9,19 @@ export interface User {
   email: string;
   role: "admin" | "worker";
   balance: number;
+  completedModules: string[]; // Track training progress
+}
+
+export interface TrainingModule {
+  id: string;
+  title: string;
+  description: string;
+  content: string;
+  quiz: {
+    question: string;
+    options: string[];
+    correctAnswer: number;
+  };
 }
 
 export interface Task {
@@ -18,7 +30,7 @@ export interface Task {
   description: string;
   payPerRow: number;
   status: "open" | "assigned" | "submitted" | "approved" | "rejected";
-  assignedTo?: string; // Reference to User.id
+  assignedTo?: string; 
   dataFields: string[];
   maxRows: number;
   createdAt: string;
@@ -26,8 +38,8 @@ export interface Task {
 
 export interface Submission {
   id: string;
-  taskId: string; // Reference to Task.id
-  workerId: string; // Reference to User.id
+  taskId: string;
+  workerId: string;
   submittedAt: string;
   fileName: string;
   rowCount: number;
@@ -38,16 +50,16 @@ export interface Submission {
 
 export interface Earning {
   id: string;
-  submissionId: string; // Reference to Submission.id
-  workerId: string; // Reference to User.id
+  submissionId: string;
+  workerId: string;
   amount: number;
   createdAt: string;
 }
 
 export interface Payout {
   id: string;
-  workerId: string; // Reference to User.id
-  earningIds: string[]; // Reference to Earning.ids included in this payout
+  workerId: string;
+  earningIds: string[];
   amount: number;
   status: "pending" | "paid";
   createdAt: string;
@@ -56,21 +68,70 @@ export interface Payout {
 
 export interface Notification {
   id: string;
-  userId: string; // Reference to User.id
+  userId: string;
   title: string;
   message: string;
   type: "info" | "success" | "warning";
-  relatedId?: string; // Reference to Task, Submission, or Payout
+  relatedId?: string;
   read: boolean;
   createdAt: string;
 }
 
+// --- TRAINING DATA ---
+
+export const TRAINING_MODULES: TrainingModule[] = [
+  {
+    id: "m1",
+    title: "Intro to Data Entry",
+    description: "Learn the fundamentals of professional data entry.",
+    content: "Professional data entry is about speed and accuracy. At DataEntry Pro, we process thousands of records daily. Your role is to ensure that the digital records match the source material perfectly. Consistency in formatting is key to high-quality data.",
+    quiz: {
+      question: "What is the most important aspect of data entry at DataEntry Pro?",
+      options: ["Speed only", "Both speed and accuracy", "Using a fancy keyboard", "Working at night"],
+      correctAnswer: 1
+    }
+  },
+  {
+    id: "m2",
+    title: "Platform Workflow",
+    description: "How to find and complete work.",
+    content: "Our workflow follows a simple cycle: 1. Browse Available Jobs. 2. Accept a Task (Assigned). 3. Perform the work and upload your file (Submitted). 4. Admin reviews your work (Approved/Rejected). Once approved, earnings are credited to your balance.",
+    quiz: {
+      question: "What is the status of a task after you upload your file?",
+      options: ["Open", "Assigned", "Submitted", "Paid"],
+      correctAnswer: 2
+    }
+  },
+  {
+    id: "m3",
+    title: "Formatting & Validation",
+    description: "CSV and XLSX requirements.",
+    content: "We strictly accept CSV and XLSX files. Every task has 'Required Columns'. Your file MUST contain these headers exactly as spelled. Files missing headers or exceeding the row limit will be automatically rejected by our validation system.",
+    quiz: {
+      question: "Which file formats does the platform accept?",
+      options: [".txt and .doc", ".pdf and .jpg", ".csv and .xlsx", ".zip only"],
+      correctAnswer: 2
+    }
+  },
+  {
+    id: "m4",
+    title: "Earnings & Payouts",
+    description: "Getting paid for your work.",
+    content: "You are paid per row of valid data. Earnings move to 'Pending' as soon as a submission is approved. Admins release payouts regularly. You can track your full history in the 'Payouts' section of your dashboard.",
+    quiz: {
+      question: "When are earnings added to your pending payouts?",
+      options: ["As soon as you upload", "After admin approval", "At the end of the month", "When you accept a task"],
+      correctAnswer: 1
+    }
+  }
+];
+
 // --- MOCK DATA ---
 
 export const MOCK_USERS: User[] = [
-  { id: "u1", name: "Admin User", email: "admin@dataentry.pro", role: "admin", balance: 0 },
-  { id: "u2", name: "Sarah Worker", email: "sarah@worker.com", role: "worker", balance: 125.50 },
-  { id: "u3", name: "John Data", email: "john@worker.com", role: "worker", balance: 45.00 },
+  { id: "u1", name: "Admin User", email: "admin@dataentry.pro", role: "admin", balance: 0, completedModules: [] },
+  { id: "u2", name: "Sarah Worker", email: "sarah@worker.com", role: "worker", balance: 125.50, completedModules: ["m1"] },
+  { id: "u3", name: "John Data", email: "john@worker.com", role: "worker", balance: 45.00, completedModules: [] },
 ];
 
 export const MOCK_TASKS: Task[] = [
@@ -97,8 +158,7 @@ export const MOCK_TASKS: Task[] = [
   }
 ];
 
-// --- APP STATE (The "Backend" of the Mockup) ---
-// Note: In a production app, these functions would be API calls (GET/POST) to the server.
+// --- APP STATE ---
 
 interface AppState {
   currentUser: User | null;
@@ -108,22 +168,16 @@ interface AppState {
   payouts: Payout[];
   notifications: Notification[];
   
-  // Auth Logic (Server-side simulation)
   login: (email: string, role: "admin" | "worker") => void;
   logout: () => void;
   
-  // Task Management (Admin-only logic)
+  completeModule: (moduleId: string) => void;
+  
   addTask: (task: Omit<Task, "id" | "createdAt" | "status">) => void;
   assignTask: (taskId: string, workerId: string) => void;
-  
-  // Submission & Earnings (Financial integrity logic)
   submitTask: (taskId: string, fileName: string, data: any[]) => void;
   reviewSubmission: (submissionId: string, status: "approved" | "rejected", reason?: string) => void;
-  
-  // Payouts (Treasury simulation)
   markAsPaid: (payoutId: string) => void;
-  
-  // Notifications (Event bus simulation)
   markNotificationRead: (id: string) => void;
   addNotification: (userId: string, title: string, message: string, type: Notification["type"], relatedId?: string) => void;
 }
@@ -143,15 +197,26 @@ export const useStore = create<AppState>((set, get) => ({
   
   login: (email, role) => {
     const user = MOCK_USERS.find(u => u.role === role) || 
-                { id: "new", name: "Demo User", email, role, balance: 0 };
+                { id: "new", name: "Demo User", email, role, balance: 0, completedModules: [] };
     set({ currentUser: user });
   },
 
   logout: () => set({ currentUser: null }),
 
+  completeModule: (moduleId) => set((state) => {
+    if (!state.currentUser) return state;
+    if (state.currentUser.completedModules.includes(moduleId)) return state;
+    
+    return {
+      currentUser: {
+        ...state.currentUser,
+        completedModules: [...state.currentUser.completedModules, moduleId]
+      }
+    };
+  }),
+
   addTask: (taskData) => {
     const { currentUser } = get();
-    // Security check: Only admins can create tasks
     if (currentUser?.role !== 'admin') return;
     set((state) => ({
       tasks: [...state.tasks, { 
@@ -165,7 +230,6 @@ export const useStore = create<AppState>((set, get) => ({
 
   assignTask: (taskId, workerId) => {
     const { currentUser } = get();
-    // Security check: Role-based assignment permission
     if (currentUser?.role !== 'admin' && currentUser?.id !== workerId) return;
     set((state) => ({
       tasks: state.tasks.map(t => t.id === taskId ? { ...t, status: "assigned", assignedTo: workerId } : t)
@@ -174,9 +238,7 @@ export const useStore = create<AppState>((set, get) => ({
 
   submitTask: (taskId, fileName, data) => set((state) => {
     const task = state.tasks.find(t => t.id === taskId);
-    // Validation check: Ensure task exists and is assigned to the worker
     if (!task || !state.currentUser || task.assignedTo !== state.currentUser.id) return state;
-    // Integrity check: Prevent double submissions
     if (task.status === 'submitted' || task.status === 'approved') return state;
 
     const newSubmission: Submission = {
@@ -197,7 +259,6 @@ export const useStore = create<AppState>((set, get) => ({
   }),
 
   reviewSubmission: (submissionId, status, reason) => set((state) => {
-    // Security check: Admin only
     if (state.currentUser?.role !== 'admin') return state;
     
     const submission = state.submissions.find(s => s.id === submissionId);
@@ -210,7 +271,6 @@ export const useStore = create<AppState>((set, get) => ({
     let newPayouts = [...state.payouts];
     let newBalance = state.currentUser?.id === submission.workerId ? state.currentUser.balance : 0;
     
-    // Financial calculation logic
     const earningAmount = status === "approved" ? submission.rowCount * task.payPerRow : 0;
 
     if (status === "approved") {
@@ -263,7 +323,6 @@ export const useStore = create<AppState>((set, get) => ({
   }),
 
   markAsPaid: (payoutId) => set((state) => {
-    // Security check: Admin only
     if (state.currentUser?.role !== 'admin') return state;
     
     const payout = state.payouts.find(p => p.id === payoutId);

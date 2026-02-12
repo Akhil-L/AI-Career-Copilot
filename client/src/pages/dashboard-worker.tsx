@@ -1,11 +1,11 @@
 import { Layout } from "@/components/layout";
-import { useStore, Task } from "@/lib/mock-data";
+import { useStore, Task, TRAINING_MODULES } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Link, useLocation } from "wouter";
-import { DollarSign, Clock, CheckCircle2, TrendingUp, ArrowRight, FileText, ShieldAlert } from "lucide-react";
+import { DollarSign, Clock, CheckCircle2, TrendingUp, ArrowRight, FileText, ShieldAlert, GraduationCap, AlertTriangle } from "lucide-react";
 
 export default function WorkerDashboard() {
   const { currentUser, tasks, assignTask } = useStore();
@@ -30,6 +30,7 @@ export default function WorkerDashboard() {
     );
   }
 
+  const isFullyTrained = currentUser.completedModules.length === TRAINING_MODULES.length;
   const myTasks = tasks.filter(t => t.assignedTo === currentUser.id && t.status !== "approved" && t.status !== "rejected");
   const availableTasks = tasks.filter(t => t.status === "open");
   const completedTasks = tasks.filter(t => t.assignedTo === currentUser.id && t.status === "approved");
@@ -37,6 +38,23 @@ export default function WorkerDashboard() {
   return (
     <Layout>
       <div className="flex flex-col gap-8">
+        {!isFullyTrained && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 flex flex-col md:flex-row items-center gap-6">
+            <div className="p-3 bg-amber-100 rounded-full text-amber-600">
+              <AlertTriangle className="h-6 w-6" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-bold text-amber-900">Training Required</h3>
+              <p className="text-amber-700 text-sm">You must complete all training modules before you can accept and submit data entry tasks.</p>
+            </div>
+            <Link href="/training">
+              <Button className="bg-amber-600 hover:bg-amber-500 font-bold gap-2">
+                <GraduationCap className="h-4 w-4" /> Go to Training
+              </Button>
+            </Link>
+          </div>
+        )}
+
         {/* Welcome & Stats */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
@@ -109,7 +127,7 @@ export default function WorkerDashboard() {
                     key={task.id} 
                     task={task} 
                     actionLabel="Accept Task"
-                    onAction={() => assignTask(task.id, currentUser.id)}
+                    onAction={() => isFullyTrained ? assignTask(task.id, currentUser.id) : setLocation("/training")}
                     variant="default"
                   />
                 ))}
