@@ -21,7 +21,7 @@ export const CONFIG = {
   SESSION_TIMEOUT_MS: Number(import.meta.env.VITE_SESSION_TIMEOUT_MS) || 3600000, // 1 hour
   
   // Platform Identification
-  APP_NAME: import.meta.env.VITE_APP_NAME || "DataEntry Pro",
+  APP_NAME: import.meta.env.VITE_APP_NAME || "Lexington Global",
   ENVIRONMENT: import.meta.env.VITE_ENVIRONMENT || "development"
 };
 
