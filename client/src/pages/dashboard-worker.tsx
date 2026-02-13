@@ -32,7 +32,7 @@ export default function WorkerDashboard() {
 
   const isFullyTrained = currentUser.completedModules.length === TRAINING_MODULES.length;
   const myTasks = tasks.filter(t => t.assignedTo === currentUser.id && t.status !== "approved" && t.status !== "rejected");
-  const availableTasks = tasks.filter(t => t.status === "open");
+  const availableTasks = tasks.filter(t => t.status === "open" && t.sourceDataUrl); // Rule: Only show tasks with source data
   const completedTasks = tasks.filter(t => t.assignedTo === currentUser.id && t.status === "approved");
 
   return (

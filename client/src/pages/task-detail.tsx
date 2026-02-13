@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Upload, FileText, AlertCircle, CheckCircle2, ShieldAlert, ListChecks } from "lucide-react";
+import { ArrowLeft, Upload, FileText, AlertCircle, CheckCircle2, ShieldAlert, ListChecks, Download } from "lucide-react";
 import { useState, useRef } from "react";
 
 export default function TaskDetail() {
@@ -22,7 +22,20 @@ export default function TaskDetail() {
   const submission = submissions.find(s => s.taskId === id && s.workerId === currentUser?.id);
 
   if (!currentUser) return <Layout><div className="p-8 text-center">Please log in to view task details.</div></Layout>;
-  if (!task) return <Layout><div>Task not found</div></Layout>;
+  
+  // Rule: If task doesn't exist or has no source data, it's not visible/accessible
+  if (!task || !task.sourceDataUrl) {
+    return (
+      <Layout>
+        <div className="flex flex-col items-center justify-center py-20">
+          <AlertCircle className="h-12 w-12 text-slate-300 mb-4" />
+          <h1 className="text-2xl font-bold text-slate-800">Task Unavailable</h1>
+          <p className="text-slate-500">This task is currently inactive or missing source data.</p>
+          <Button onClick={() => setLocation("/dashboard")} variant="link">Return to Dashboard</Button>
+        </div>
+      </Layout>
+    );
+  }
 
   const isAssignedToMe = task.assignedTo === currentUser.id;
   const isOpenTask = task.status === 'open';
@@ -70,7 +83,12 @@ export default function TaskDetail() {
             return;
           }
 
-          // Row Count Check
+          // Row Count Check (Min 1 row of data)
+          if (dataRows.length === 0) {
+            resolve({ success: false, error: "Submission must contain at least one row of data." });
+            return;
+          }
+
           if (dataRows.length > task.maxRows) {
             resolve({ 
               success: false, 
@@ -85,6 +103,18 @@ export default function TaskDetail() {
             headers.forEach((h, i) => obj[h] = values[i]);
             return obj;
           });
+
+          // Custom Validation: Warehouse Check
+          if (task.validWarehouseNames && task.validWarehouseNames.length > 0) {
+            const invalidRows = parsedData.filter(row => !task.validWarehouseNames?.includes(row["Warehouse"]));
+            if (invalidRows.length > 0) {
+              resolve({ 
+                success: false, 
+                error: `Invalid Warehouse detected. Allowed: ${task.validWarehouseNames.join(", ")}` 
+              });
+              return;
+            }
+          }
 
           resolve({ success: true, data: parsedData });
         } catch (err) {
@@ -166,6 +196,19 @@ export default function TaskDetail() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Download className="h-5 w-5 text-blue-600" />
+                    <div>
+                      <p className="text-sm font-bold text-blue-900">Source Data Available</p>
+                      <p className="text-xs text-blue-700">Download the required file to start processing.</p>
+                    </div>
+                  </div>
+                  <Button size="sm" variant="outline" className="bg-white border-blue-200 text-blue-600 hover:bg-blue-100">
+                    Download Source
+                  </Button>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-slate-50 p-4 rounded-lg border">
                     <h4 className="font-semibold mb-2 flex items-center gap-2 text-slate-700">

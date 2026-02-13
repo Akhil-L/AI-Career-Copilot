@@ -40,6 +40,8 @@ export interface Task {
   dataFields: string[];
   maxRows: number;
   createdAt: string;
+  sourceDataUrl?: string; // NEW: Link to required source data
+  validWarehouseNames?: string[]; // NEW: For validation
 }
 
 export interface Submission {
@@ -170,7 +172,7 @@ Ethical Handling: Treat every row as if it were your own personal information. O
 
 export const MOCK_USERS: User[] = [
   { id: "u1", name: "Admin User", email: "admin@dataentry.pro", role: "admin", balance: 0, completedModules: [], moduleAttempts: {} },
-  { id: "u2", name: "Sarah Worker", email: "sarah@worker.com", role: "worker", balance: 125.50, completedModules: ["m1"], moduleAttempts: { "m1": 1 } },
+  { id: "u2", name: "Sarah Worker", email: "sarah@worker.com", role: "worker", balance: 125.50, completedModules: ["m1", "m2", "m3", "m4"], moduleAttempts: { "m1": 1, "m2": 1, "m3": 1, "m4": 1 } },
   { id: "u3", name: "John Data", email: "john@worker.com", role: "worker", balance: 45.00, completedModules: [], moduleAttempts: {} },
 ];
 
@@ -178,23 +180,26 @@ export const MOCK_TASKS: Task[] = [
   { 
     id: "t1", 
     title: "Invoice Batch Processing", 
-    description: "Upload CSV with Invoice Number, Date, and Amount.", 
+    description: "Download the source invoice list and format into CSV with required headers.", 
     payPerRow: 0.25, 
     status: "open", 
     dataFields: ["Invoice Number", "Date", "Amount"], 
     maxRows: CONFIG.DEFAULT_MAX_ROWS,
-    createdAt: "2024-02-10T10:00:00Z" 
+    createdAt: "2024-02-10T10:00:00Z",
+    sourceDataUrl: "/data/invoices_source.pdf"
   },
   { 
     id: "t2", 
     title: "Inventory Log Update", 
-    description: "Update product stock levels via Excel file.", 
+    description: "Process the product stock list. Ensure all Warehouse names are valid.", 
     payPerRow: 0.15, 
     status: "assigned", 
     assignedTo: "u2",
     dataFields: ["Product ID", "Quantity", "Warehouse"], 
     maxRows: 50,
-    createdAt: "2024-02-11T09:30:00Z" 
+    createdAt: "2024-02-11T09:30:00Z",
+    sourceDataUrl: "/data/stock_levels_feb.xlsx",
+    validWarehouseNames: ["North-Hub", "East-Terminal", "South-Depot", "Central-Logistics"]
   }
 ];
 
