@@ -38,6 +38,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       ];
 
   const publicLinks = [
+    { label: "For Businesses", href: "/businesses" },
     { label: "About Us", href: "/about" },
     { label: "Contact", href: "/contact" },
   ];
@@ -199,6 +200,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div>
               <h4 className="font-bold text-white mb-6 uppercase text-sm tracking-widest">Platform</h4>
               <ul className="space-y-4 text-slate-400 font-medium">
+                <li><Link href="/businesses" className="hover:text-blue-400 transition-colors">For Businesses</Link></li>
                 <li><Link href="/about" className="hover:text-blue-400 transition-colors">About Us</Link></li>
                 <li><Link href="/contact" className="hover:text-blue-400 transition-colors">Contact Support</Link></li>
                 <li><Link href="/auth?tab=register" className="hover:text-blue-400 transition-colors">Apply as Specialist</Link></li>

@@ -13,6 +13,7 @@ import TrainingPage from "@/pages/training";
 import PayoutsPage from "@/pages/payouts-worker";
 import AboutPage from "@/pages/about";
 import ContactPage from "@/pages/contact";
+import ForBusinesses from "@/pages/for-businesses";
 import { TermsPage, PrivacyPage, PayoutPolicyPage } from "@/pages/legal";
 
 function Router() {
@@ -27,6 +28,7 @@ function Router() {
       <Route path="/task/:id" component={TaskDetail} />
       <Route path="/about" component={AboutPage} />
       <Route path="/contact" component={ContactPage} />
+      <Route path="/businesses" component={ForBusinesses} />
       <Route path="/terms" component={TermsPage} />
       <Route path="/privacy" component={PrivacyPage} />
       <Route path="/payout-policy" component={PayoutPolicyPage} />

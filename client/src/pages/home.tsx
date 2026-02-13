@@ -36,14 +36,14 @@ export default function Home() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 mt-4">
-            <Link href="/auth?tab=register">
+            <Link href="/businesses">
               <Button size="lg" className="bg-blue-600 hover:bg-blue-500 text-white border-none h-14 px-10 text-lg shadow-xl shadow-blue-900/40 font-bold">
-                Join our Global Network
+                For Businesses
               </Button>
             </Link>
-            <Link href="/auth">
+            <Link href="/auth?tab=register">
               <Button size="lg" variant="outline" className="h-14 px-10 text-lg border-slate-700 hover:bg-slate-800 text-white hover:text-white font-semibold">
-                Specialist Login
+                Apply as Specialist
               </Button>
             </Link>
           </div>
