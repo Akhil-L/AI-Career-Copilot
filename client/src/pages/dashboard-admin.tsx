@@ -1,5 +1,6 @@
 import { Layout } from "@/components/layout";
-import { useStore, Submission, Payout } from "@/lib/mock-data";
+import { useStore, Submission, Payout, MOCK_USERS } from "@/lib/mock-data";
+import { getWorkerRank } from "./dashboard-worker";
 import { CONFIG } from "@/lib/config";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -21,7 +22,9 @@ import {
   CreditCard,
   ShieldAlert,
   Clock,
-  CheckCircle2
+  CheckCircle2,
+  Award,
+  ShieldCheck
 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -135,7 +138,59 @@ export default function AdminDashboard() {
             <TabsTrigger value="payouts" className="data-[state=active]:bg-primary data-[state=active]:text-white px-8">
               Payout Queue ({pendingPayouts.length})
             </TabsTrigger>
+            <TabsTrigger value="workers" className="data-[state=active]:bg-primary data-[state=active]:text-white px-8">
+              Worker Ranks
+            </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="workers">
+            <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
+              <CardHeader className="bg-slate-50/50 border-b">
+                <CardTitle className="text-lg">Worker Performance Directory</CardTitle>
+                <CardDescription>Monitor accuracy scores and reward high-performing specialists.</CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-slate-50 hover:bg-slate-50">
+                      <TableHead className="pl-6">Worker Name</TableHead>
+                      <TableHead>Rank</TableHead>
+                      <TableHead>Accuracy</TableHead>
+                      <TableHead>Approved</TableHead>
+                      <TableHead className="text-right pr-6">Reliability</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {MOCK_USERS.filter(u => u.role === 'worker').map(worker => {
+                      const rank = getWorkerRank(worker);
+                      return (
+                        <TableRow key={worker.id} className="hover:bg-slate-50/50 transition-colors">
+                          <TableCell className="pl-6 font-medium">{worker.name}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={`font-bold ${rank.color}`}>
+                              {rank.label}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <span className={`font-bold ${worker.accuracyScore && worker.accuracyScore >= 95 ? 'text-emerald-600' : 'text-slate-900'}`}>
+                              {worker.accuracyScore || 0}%
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-slate-500">{worker.approvedSubmissions || 0} jobs</TableCell>
+                          <TableCell className="text-right pr-6">
+                            <div className="flex justify-end gap-1">
+                              {worker.accuracyScore && worker.accuracyScore >= 98 && <ShieldCheck className="h-4 w-4 text-blue-500" title="High Reliability" />}
+                              {worker.approvedSubmissions && worker.approvedSubmissions > 20 && <Award className="h-4 w-4 text-purple-500" title="Veteran Status" />}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="client-tasks">
             <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">

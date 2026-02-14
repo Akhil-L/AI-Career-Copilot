@@ -11,6 +11,9 @@ export interface User {
   balance: number;
   completedModules: string[]; // Track training progress
   moduleAttempts: Record<string, number>; // moduleId -> attemptCount
+  accuracyScore?: number; // 0-100
+  approvedSubmissions?: number;
+  rejectedSubmissions?: number;
 }
 
 export interface QuizQuestion {
@@ -164,9 +167,9 @@ export const TRAINING_MODULES: TrainingModule[] = [
 // --- MOCK DATA ---
 
 export const MOCK_USERS: User[] = [
-  { id: "u1", name: "Admin User", email: "admin@dataentry.pro", role: "admin", balance: 0, completedModules: [], moduleAttempts: {} },
-  { id: "u2", name: "Sarah Worker", email: "sarah@worker.com", role: "worker", balance: 125.50, completedModules: ["m1", "m2", "m3", "m4"], moduleAttempts: { "m1": 1, "m2": 1, "m3": 1, "m4": 1 } },
-  { id: "u3", name: "John Data", email: "john@worker.com", role: "worker", balance: 45.00, completedModules: [], moduleAttempts: {} },
+  { id: "u1", name: "Admin User", email: "admin@dataentry.pro", role: "admin", balance: 0, completedModules: [], moduleAttempts: {}, accuracyScore: 100, approvedSubmissions: 0, rejectedSubmissions: 0 },
+  { id: "u2", name: "Sarah Worker", email: "sarah@worker.com", role: "worker", balance: 125.50, completedModules: ["m1", "m2", "m3", "m4"], moduleAttempts: { "m1": 1, "m2": 1, "m3": 1, "m4": 1 }, accuracyScore: 98, approvedSubmissions: 45, rejectedSubmissions: 1 },
+  { id: "u3", name: "John Data", email: "john@worker.com", role: "worker", balance: 45.00, completedModules: [], moduleAttempts: {}, accuracyScore: 85, approvedSubmissions: 12, rejectedSubmissions: 2 },
   { id: "u4", name: "Acme Corp", email: "client@acme.com", role: "client", balance: 0, completedModules: [], moduleAttempts: {} },
 ];
 

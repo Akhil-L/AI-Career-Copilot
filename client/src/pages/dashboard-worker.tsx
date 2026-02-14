@@ -1,11 +1,20 @@
 import { Layout } from "@/components/layout";
-import { useStore, Task, TRAINING_MODULES } from "@/lib/mock-data";
+import { useStore, Task, TRAINING_MODULES, User } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Link, useLocation } from "wouter";
-import { DollarSign, Clock, CheckCircle2, TrendingUp, ArrowRight, FileText, ShieldAlert, GraduationCap, AlertTriangle } from "lucide-react";
+import { DollarSign, Clock, CheckCircle2, TrendingUp, ArrowRight, FileText, ShieldAlert, GraduationCap, AlertTriangle, Star, Award } from "lucide-react";
+
+export function getWorkerRank(user: User) {
+  const accuracy = user.accuracyScore || 0;
+  const completed = user.approvedSubmissions || 0;
+  
+  if (completed > 50 && accuracy >= 98) return { label: "Top Performer", color: "bg-purple-100 text-purple-700 border-purple-200" };
+  if (completed > 10 && accuracy >= 90) return { label: "Verified", color: "bg-blue-100 text-blue-700 border-blue-200" };
+  return { label: "Beginner", color: "bg-slate-100 text-slate-700 border-slate-200" };
+}
 
 export default function WorkerDashboard() {
   const { currentUser, tasks, assignTask } = useStore();
@@ -31,9 +40,11 @@ export default function WorkerDashboard() {
   }
 
   const isFullyTrained = currentUser.completedModules.length === TRAINING_MODULES.length;
+  const trainingProgress = Math.round((currentUser.completedModules.length / TRAINING_MODULES.length) * 100);
   const myTasks = tasks.filter(t => t.assignedTo === currentUser.id && t.status !== "approved" && t.status !== "rejected");
   const availableTasks = tasks.filter(t => t.status === "open" && t.sourceDataUrl); // Rule: Only show tasks with source data
   const completedTasks = tasks.filter(t => t.assignedTo === currentUser.id && t.status === "approved");
+  const rank = getWorkerRank(currentUser);
 
   return (
     <Layout>
@@ -44,12 +55,12 @@ export default function WorkerDashboard() {
               <AlertTriangle className="h-6 w-6" />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-bold text-amber-900">Training Required</h3>
+              <h3 className="text-lg font-bold text-amber-900">Training in Progress ({trainingProgress}%)</h3>
               <p className="text-amber-700 text-sm">You must complete all training modules before you can accept and submit data entry tasks.</p>
             </div>
             <Link href="/training">
               <Button className="bg-amber-600 hover:bg-amber-500 font-bold gap-2">
-                <GraduationCap className="h-4 w-4" /> Go to Training
+                <GraduationCap className="h-4 w-4" /> Continue Training
               </Button>
             </Link>
           </div>
@@ -58,7 +69,12 @@ export default function WorkerDashboard() {
         {/* Welcome & Stats */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-heading font-bold text-slate-900">Dashboard</h1>
+            <div className="flex items-center gap-3 mb-1">
+              <h1 className="text-3xl font-heading font-bold text-slate-900">Dashboard</h1>
+              <Badge variant="outline" className={`font-bold px-3 py-1 ${rank.color}`}>
+                <Star className="h-3 w-3 mr-1.5 fill-current" /> {rank.label}
+              </Badge>
+            </div>
             <p className="text-muted-foreground">Welcome back, {currentUser.name}. Here's your activity overview.</p>
           </div>
           <div className="flex items-center gap-2">
@@ -96,11 +112,11 @@ export default function WorkerDashboard() {
           <Card className="bg-gradient-to-br from-purple-50 to-white border-purple-100 shadow-sm">
             <CardContent className="p-6 flex items-center gap-4">
               <div className="p-3 rounded-xl bg-purple-100 text-purple-600">
-                <TrendingUp className="h-6 w-6" />
+                <Award className="h-6 w-6" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Accuracy Score</p>
-                <h3 className="text-2xl font-bold text-slate-900">98%</h3>
+                <h3 className="text-2xl font-bold text-slate-900">{currentUser.accuracyScore || 0}%</h3>
               </div>
             </CardContent>
           </Card>
