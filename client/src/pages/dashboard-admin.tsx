@@ -3,7 +3,7 @@ import { useStore, Submission, Payout, MOCK_USERS } from "@/lib/mock-data";
 import { getWorkerRank } from "./dashboard-worker";
 import { CONFIG } from "@/lib/config";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -24,11 +24,23 @@ import {
   Clock,
   CheckCircle2,
   Award,
-  ShieldCheck
+  ShieldCheck,
+  Activity,
+  ArrowUpRight
 } from "lucide-react";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell } from 'recharts';
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+
+const MOCK_PLATFORM_DATA = [
+  { name: 'Jan', submissions: 400 },
+  { name: 'Feb', submissions: 600 },
+  { name: 'Mar', submissions: 800 },
+  { name: 'Apr', submissions: 750 },
+  { name: 'May', submissions: 900 },
+  { name: 'Jun', submissions: 1200 },
+];
 
 export default function AdminDashboard() {
   const { currentUser, tasks, submissions, payouts, reviewSubmission, addTask, markAsPaid } = useStore();
@@ -127,7 +139,39 @@ export default function AdminDashboard() {
           <AnalyticsCard title="Active Workers" value="2,541" icon={Users} color="slate" />
         </div>
 
-        <Tabs defaultValue="submissions" className="w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-8">
+            <Card className="border-slate-200">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg font-bold">Platform Throughput</CardTitle>
+                  <CardDescription>Monthly data submission volume across all campaigns</CardDescription>
+                </div>
+                <Activity className="h-5 w-5 text-slate-400" />
+              </CardHeader>
+              <CardContent className="pt-4">
+                <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={MOCK_PLATFORM_DATA}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                      <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                      <Tooltip 
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                        cursor={{fill: '#f8fafc'}}
+                      />
+                      <Bar dataKey="submissions" radius={[4, 4, 0, 0]}>
+                        {MOCK_PLATFORM_DATA.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={index === MOCK_PLATFORM_DATA.length - 1 ? '#2563eb' : '#cbd5e1'} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Tabs defaultValue="submissions" className="w-full">
           <TabsList className="bg-white border p-1 h-12 mb-6">
             <TabsTrigger value="client-tasks" className="data-[state=active]:bg-primary data-[state=active]:text-white px-8">
               New Project Requests ({tasks.filter(t => t.status === 'pending_review').length})
@@ -367,7 +411,52 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
           </TabsContent>
-        </Tabs>
+            </Tabs>
+          </div>
+
+          <div className="space-y-6">
+            <Card className="border-slate-200">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg font-bold">Platform Activity</CardTitle>
+                <CardDescription>Live system events</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4 pt-4">
+                {[
+                  { title: 'Enterprise Project', desc: 'Acme Corp submitted "Q2 Audit"', time: 'Just now', icon: Activity, color: 'text-blue-500 bg-blue-50' },
+                  { title: 'Payout Released', desc: 'Sarah Worker: $75.50 released', time: '12m ago', icon: CreditCard, color: 'text-emerald-500 bg-emerald-50' },
+                  { title: 'System Audit', desc: 'Manual review of Batch #449 completed', time: '45m ago', icon: ShieldCheck, color: 'text-purple-500 bg-purple-50' },
+                  { title: 'New Specialist', desc: 'Michael R. passed Module 4', time: '1h ago', icon: GraduationCap, color: 'text-amber-500 bg-amber-50' },
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-4">
+                    <div className={`mt-1 h-8 w-8 rounded-lg ${item.color} flex items-center justify-center shrink-0`}>
+                      <item.icon className="h-4 w-4" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-bold text-slate-900">{item.title}</p>
+                      <p className="text-xs text-slate-500 leading-tight">{item.desc}</p>
+                      <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">{item.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+              <CardFooter className="pt-2 border-t mt-2">
+                <Button variant="ghost" size="sm" className="w-full text-xs text-slate-500 font-bold">
+                  Download Event Log <ArrowUpRight className="ml-1 h-3 w-3" />
+                </Button>
+              </CardFooter>
+            </Card>
+
+            <Card className="bg-slate-50 border-slate-200 border-dashed">
+              <CardContent className="p-6 text-center space-y-3">
+                <div className="p-3 bg-white rounded-full border border-slate-200 w-fit mx-auto shadow-sm text-blue-600">
+                  <TrendingUp className="h-6 w-6" />
+                </div>
+                <h4 className="font-bold text-slate-900">Efficiency Insights</h4>
+                <p className="text-sm text-slate-500">Average approval time has decreased by <span className="text-emerald-600 font-bold">14%</span> this week.</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </Layout>
   );

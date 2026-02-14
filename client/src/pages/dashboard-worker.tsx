@@ -5,7 +5,18 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Link, useLocation } from "wouter";
-import { DollarSign, Clock, CheckCircle2, TrendingUp, ArrowRight, FileText, ShieldAlert, GraduationCap, AlertTriangle, Star, Award } from "lucide-react";
+import { DollarSign, Clock, CheckCircle2, TrendingUp, ArrowRight, FileText, ShieldAlert, GraduationCap, AlertTriangle, Star, Award, BarChart3 } from "lucide-react";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+
+const MOCK_CHART_DATA = [
+  { name: 'Mon', earnings: 12 },
+  { name: 'Tue', earnings: 18 },
+  { name: 'Wed', earnings: 15 },
+  { name: 'Thu', earnings: 25 },
+  { name: 'Fri', earnings: 32 },
+  { name: 'Sat', earnings: 28 },
+  { name: 'Sun', earnings: 40 },
+];
 
 export function getWorkerRank(user: User) {
   const accuracy = user.accuracyScore || 0;
@@ -122,8 +133,43 @@ export default function WorkerDashboard() {
           </Card>
         </div>
 
-        {/* Tasks Tabs */}
-        <Tabs defaultValue="available" className="w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content Area */}
+          <div className="lg:col-span-2 space-y-8">
+            <Card className="border-slate-200">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <div>
+                  <CardTitle className="text-lg font-bold">Earnings Performance</CardTitle>
+                  <CardDescription>Daily earnings trend for the last 7 days</CardDescription>
+                </div>
+                <BarChart3 className="h-5 w-5 text-slate-400" />
+              </CardHeader>
+              <CardContent className="pt-4">
+                <div className="h-[240px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={MOCK_CHART_DATA}>
+                      <defs>
+                        <linearGradient id="colorEarnings" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#2563eb" stopOpacity={0.1}/>
+                          <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} dy={10} />
+                      <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                      <Tooltip 
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                        formatter={(value: number) => [`$${value.toFixed(2)}`, 'Earnings']}
+                      />
+                      <Area type="monotone" dataKey="earnings" stroke="#2563eb" strokeWidth={3} fillOpacity={1} fill="url(#colorEarnings)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Tasks Tabs */}
+            <Tabs defaultValue="available" className="w-full">
           <div className="flex items-center justify-between mb-4">
             <TabsList className="bg-muted/50">
               <TabsTrigger value="available">Available Jobs ({availableTasks.length})</TabsTrigger>
@@ -171,7 +217,62 @@ export default function WorkerDashboard() {
               </div>
             )}
           </TabsContent>
-        </Tabs>
+            </Tabs>
+          </div>
+
+          {/* Sidebar / Activity Feed */}
+          <div className="space-y-6">
+            <Card className="border-slate-200">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg font-bold">Activity Feed</CardTitle>
+                <CardDescription>Recent platform events</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4 pt-4">
+                {[
+                  { title: 'Earnings Released', desc: 'Payout of $45.00 completed', time: '2h ago', icon: DollarSign, color: 'text-emerald-500 bg-emerald-50' },
+                  { title: 'Task Approved', desc: 'Inventory Log Update verified', time: '5h ago', icon: CheckCircle2, color: 'text-blue-500 bg-blue-50' },
+                  { title: 'Rank Up!', desc: 'You are now a Verified worker', time: '1d ago', icon: Star, color: 'text-purple-500 bg-purple-50' },
+                  { title: 'Academy Award', desc: 'Training Module 4 completed', time: '2d ago', icon: Award, color: 'text-amber-500 bg-amber-50' },
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-4 group cursor-default">
+                    <div className={`mt-1 h-8 w-8 rounded-lg ${item.color} flex items-center justify-center shrink-0 transition-transform group-hover:scale-110`}>
+                      <item.icon className="h-4 w-4" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-bold text-slate-900">{item.title}</p>
+                      <p className="text-xs text-slate-500 leading-tight">{item.desc}</p>
+                      <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">{item.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+              <CardFooter className="pt-2 border-t mt-2">
+                <Button variant="ghost" size="sm" className="w-full text-xs text-slate-500 font-bold hover:text-blue-600">
+                  View Full History
+                </Button>
+              </CardFooter>
+            </Card>
+
+            <Card className="bg-slate-900 border-slate-800 text-white overflow-hidden relative">
+              <div className="absolute top-0 right-0 p-4 opacity-10">
+                <ShieldAlert className="h-20 w-20" />
+              </div>
+              <CardHeader className="pb-2 relative z-10">
+                <CardTitle className="text-sm font-bold text-blue-400 uppercase tracking-widest">Support Tip</CardTitle>
+              </CardHeader>
+              <CardContent className="relative z-10">
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  Maintain an accuracy score above <span className="text-white font-bold">95%</span> to qualify for premium high-pay enterprise tasks.
+                </p>
+              </CardContent>
+              <CardFooter className="relative z-10">
+                <Button variant="link" className="text-blue-400 p-0 h-auto font-bold text-xs hover:text-blue-300">
+                  Read quality guidelines <ArrowRight className="ml-1 h-3 w-3" />
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
       </div>
     </Layout>
   );
