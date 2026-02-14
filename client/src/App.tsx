@@ -14,6 +14,7 @@ import PayoutsPage from "@/pages/payouts-worker";
 import AboutPage from "@/pages/about";
 import ContactPage from "@/pages/contact";
 import ForBusinesses from "@/pages/for-businesses";
+import ClientDashboard from "@/pages/dashboard-client";
 import { TermsPage, PrivacyPage, PayoutPolicyPage } from "@/pages/legal";
 
 function Router() {
@@ -22,6 +23,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/auth" component={Auth} />
       <Route path="/dashboard" component={WorkerDashboard} />
+      <Route path="/client" component={ClientDashboard} />
       <Route path="/payouts" component={PayoutsPage} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/training" component={TrainingPage} />

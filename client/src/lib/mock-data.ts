@@ -7,7 +7,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: "admin" | "worker";
+  role: "admin" | "worker" | "client";
   balance: number;
   completedModules: string[]; // Track training progress
   moduleAttempts: Record<string, number>; // moduleId -> attemptCount
@@ -35,13 +35,14 @@ export interface Task {
   title: string;
   description: string;
   payPerRow: number;
-  status: "open" | "assigned" | "submitted" | "approved" | "rejected";
+  status: "pending_review" | "open" | "assigned" | "submitted" | "approved" | "rejected";
+  clientId?: string; // NEW: Reference to User.id (client)
   assignedTo?: string; 
   dataFields: string[];
   maxRows: number;
   createdAt: string;
-  sourceDataUrl?: string; // NEW: Link to required source data
-  validWarehouseNames?: string[]; // NEW: For validation
+  sourceDataUrl?: string; 
+  validWarehouseNames?: string[]; 
 }
 
 export interface Submission {
@@ -92,9 +93,7 @@ export const TRAINING_MODULES: TrainingModule[] = [
     id: "m1",
     title: "Intro to Data Entry & Accuracy Auditing",
     description: "Fundamentals and quality control techniques.",
-    content: `Professional data entry is built on accuracy. 
-Accuracy Auditing: Always double-check your work before submission. A common technique is the "Scan & Verify" method: scan the source document, then verify the digital entry.
-Quality Control: Look for common typos like transposed numbers (123 vs 132) or misspellings in repetitive names. High accuracy ensures long-term platform access.`,
+    content: `Professional data entry is built on accuracy...`,
     quiz: [
       {
         question: "What is the 'Scan & Verify' method?",
@@ -116,10 +115,7 @@ Quality Control: Look for common typos like transposed numbers (123 vs 132) or m
     id: "m2",
     title: "Detecting Duplicates & Inconsistencies",
     description: "Ensuring data integrity in bulk sets.",
-    content: `Data Integrity is vital. 
-Duplicates: Never upload the same record twice. Even if the source has duplicates, a professional auditor flags them.
-Inconsistencies: Watch for varied formats. Example: 'USA', 'U.S.A', and 'United States' should all be standardized to the format requested in the task instructions.
-Standardization: Follow the task guidelines strictly for dates (DD/MM/YYYY vs MM/DD/YYYY).`,
+    content: `Data Integrity is vital...`,
     quiz: [
       {
         question: "How should you handle inconsistent country names like 'USA' and 'United States'?",
@@ -135,8 +131,7 @@ Standardization: Follow the task guidelines strictly for dates (DD/MM/YYYY vs MM
     id: "m3",
     title: "Handling Messy or Unclear Data",
     description: "Strategies for low-quality source material.",
-    content: `Unclear Source: If a handwritten scan is illegible, do not guess. Use the platform's 'Flag for Clarification' or follow specific task rules for 'N/A' entries.
-Incomplete Data: If a required field is missing in the source, check if there's a fallback instruction. If not, contact Admin before submitting a potentially invalid file.`,
+    content: `Unclear Source...`,
     quiz: [
       {
         question: "What should you do if a source scan is illegible?",
@@ -152,9 +147,7 @@ Incomplete Data: If a required field is missing in the source, check if there's 
     id: "m4",
     title: "Data Privacy & Ethical Handling",
     description: "Confidentiality and client information safety.",
-    content: `Privacy: You are handling sensitive client information. 
-Confidentiality: Never download, copy, or share client data outside the platform. 
-Ethical Handling: Treat every row as if it were your own personal information. Once a task is complete and approved, ensure any temporary local copies are deleted immediately.`,
+    content: `Privacy...`,
     quiz: [
       {
         question: "Is it acceptable to save a copy of client data for your personal records?",
@@ -174,6 +167,7 @@ export const MOCK_USERS: User[] = [
   { id: "u1", name: "Admin User", email: "admin@dataentry.pro", role: "admin", balance: 0, completedModules: [], moduleAttempts: {} },
   { id: "u2", name: "Sarah Worker", email: "sarah@worker.com", role: "worker", balance: 125.50, completedModules: ["m1", "m2", "m3", "m4"], moduleAttempts: { "m1": 1, "m2": 1, "m3": 1, "m4": 1 } },
   { id: "u3", name: "John Data", email: "john@worker.com", role: "worker", balance: 45.00, completedModules: [], moduleAttempts: {} },
+  { id: "u4", name: "Acme Corp", email: "client@acme.com", role: "client", balance: 0, completedModules: [], moduleAttempts: {} },
 ];
 
 export const MOCK_TASKS: Task[] = [
@@ -186,7 +180,8 @@ export const MOCK_TASKS: Task[] = [
     dataFields: ["Invoice Number", "Date", "Amount"], 
     maxRows: CONFIG.DEFAULT_MAX_ROWS,
     createdAt: "2024-02-10T10:00:00Z",
-    sourceDataUrl: "/data/invoices_source.pdf"
+    sourceDataUrl: "/data/invoices_source.pdf",
+    clientId: "u4"
   },
   { 
     id: "t2", 
@@ -199,7 +194,8 @@ export const MOCK_TASKS: Task[] = [
     maxRows: 50,
     createdAt: "2024-02-11T09:30:00Z",
     sourceDataUrl: "/data/stock_levels_feb.xlsx",
-    validWarehouseNames: ["North-Hub", "East-Terminal", "South-Depot", "Central-Logistics"]
+    validWarehouseNames: ["North-Hub", "East-Terminal", "South-Depot", "Central-Logistics"],
+    clientId: "u4"
   }
 ];
 
@@ -213,13 +209,15 @@ interface AppState {
   payouts: Payout[];
   notifications: Notification[];
   
-  login: (email: string, role: "admin" | "worker") => void;
+  login: (email: string, role: "admin" | "worker" | "client") => void;
   logout: () => void;
   
   registerAttempt: (moduleId: string) => void;
   completeModule: (moduleId: string) => void;
   
   addTask: (task: Omit<Task, "id" | "createdAt" | "status">) => void;
+  clientSubmitTask: (task: Omit<Task, "id" | "createdAt" | "status">) => void;
+  approveTask: (taskId: string) => void;
   assignTask: (taskId: string, workerId: string) => void;
   submitTask: (taskId: string, fileName: string, data: any[]) => void;
   reviewSubmission: (submissionId: string, status: "approved" | "rejected", reason?: string) => void;
@@ -280,6 +278,28 @@ export const useStore = create<AppState>((set, get) => ({
         status: "open", 
         createdAt: new Date().toISOString() 
       }]
+    }));
+  },
+
+  clientSubmitTask: (taskData) => {
+    const { currentUser } = get();
+    if (currentUser?.role !== 'client') return;
+    set((state) => ({
+      tasks: [...state.tasks, { 
+        ...taskData, 
+        id: Math.random().toString(36).substr(2, 9), 
+        status: "pending_review", 
+        clientId: currentUser.id,
+        createdAt: new Date().toISOString() 
+      }]
+    }));
+  },
+
+  approveTask: (taskId) => {
+    const { currentUser } = get();
+    if (currentUser?.role !== 'admin') return;
+    set((state) => ({
+      tasks: state.tasks.map(t => t.id === taskId ? { ...t, status: "open" } : t)
     }));
   },
 

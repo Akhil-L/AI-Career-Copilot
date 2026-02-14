@@ -11,7 +11,8 @@ import {
   X,
   ChevronRight,
   Globe,
-  Shield
+  Shield,
+  Briefcase
 } from "lucide-react";
 import { useState } from "react";
 import { 
@@ -31,6 +32,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   const navItems = currentUser?.role === 'admin' 
     ? [{ label: "Admin Portal", href: "/admin", icon: Shield }]
+    : currentUser?.role === 'client'
+    ? [{ label: "Client Portal", href: "/client", icon: Briefcase }]
     : [
         { label: "Work Hub", href: "/dashboard", icon: LayoutDashboard },
         { label: "Academy", href: "/training", icon: GraduationCap },

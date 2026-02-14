@@ -126,6 +126,9 @@ export default function AdminDashboard() {
 
         <Tabs defaultValue="submissions" className="w-full">
           <TabsList className="bg-white border p-1 h-12 mb-6">
+            <TabsTrigger value="client-tasks" className="data-[state=active]:bg-primary data-[state=active]:text-white px-8">
+              New Project Requests ({tasks.filter(t => t.status === 'pending_review').length})
+            </TabsTrigger>
             <TabsTrigger value="submissions" className="data-[state=active]:bg-primary data-[state=active]:text-white px-8">
               Work Reviews ({pendingSubmissions.length})
             </TabsTrigger>
@@ -133,6 +136,45 @@ export default function AdminDashboard() {
               Payout Queue ({pendingPayouts.length})
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="client-tasks">
+            <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
+              <CardHeader className="bg-slate-50/50 border-b">
+                <CardTitle className="text-lg">Project Approval Queue</CardTitle>
+                <CardDescription>Review and approve projects submitted by enterprise clients.</CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-slate-50 hover:bg-slate-50">
+                      <TableHead className="pl-6">Client ID</TableHead>
+                      <TableHead>Project Title</TableHead>
+                      <TableHead>Budget</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead className="text-right pr-6">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {tasks.filter(t => t.status === 'pending_review').map(task => (
+                      <TableRow key={task.id}>
+                        <TableCell className="pl-6 font-medium">{task.clientId || "N/A"}</TableCell>
+                        <TableCell>{task.title}</TableCell>
+                        <TableCell className="font-bold">${task.payPerRow.toFixed(2)}</TableCell>
+                        <TableCell className="text-slate-500 text-sm">{new Date(task.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell className="text-right pr-6">
+                          <Button size="sm" onClick={() => {
+                            useStore.getState().approveTask(task.id);
+                            toast({ title: "Project Approved", description: "This job is now available to workers." });
+                          }}>Approve & Publish</Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {tasks.filter(t => t.status === 'pending_review').length === 0 && <div className="p-12 text-center text-slate-400 italic">No new project requests.</div>}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="submissions">
             <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
