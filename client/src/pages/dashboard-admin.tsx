@@ -48,7 +48,16 @@ export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [newTask, setNewTask] = useState({ title: "", description: "", payPerRow: "0.10", dataFields: "", maxRows: CONFIG.DEFAULT_MAX_ROWS.toString() });
+  const [newTask, setNewTask] = useState({ 
+    title: "", 
+    description: "", 
+    payPerRow: "0.10", 
+    dataFields: "", 
+    maxRows: CONFIG.DEFAULT_MAX_ROWS.toString(),
+    slaHours: "24",
+    revisionPolicy: "Standard",
+    priority: "medium"
+  });
 
   const [reviewSub, setReviewSub] = useState<Submission | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
@@ -83,10 +92,13 @@ export default function AdminDashboard() {
       description: newTask.description,
       payPerRow: parseFloat(newTask.payPerRow),
       maxRows: parseInt(newTask.maxRows),
-      dataFields: newTask.dataFields.split(",").map(s => s.trim())
+      dataFields: newTask.dataFields.split(",").map(s => s.trim()),
+      slaHours: parseInt(newTask.slaHours),
+      revisionPolicy: newTask.revisionPolicy,
+      priority: newTask.priority as any
     });
     setIsCreateOpen(false);
-    toast({ title: "Job Created", description: "New task is now live." });
+    toast({ title: "Job Created", description: "New task is now live with SLA tracking." });
   };
 
   const handleReview = (status: "approved" | "rejected") => {
@@ -123,6 +135,24 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2"><Label className="text-xs font-bold uppercase text-slate-500">Pay per Row ($)</Label><Input type="number" step="0.01" value={newTask.payPerRow} onChange={e => setNewTask({...newTask, payPerRow: e.target.value})} /></div>
                   <div className="grid gap-2"><Label className="text-xs font-bold uppercase text-slate-500">Max Rows</Label><Input type="number" value={newTask.maxRows} onChange={e => setNewTask({...newTask, maxRows: e.target.value})} /></div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label className="text-xs font-bold uppercase text-slate-500">SLA Turnaround (Hours)</Label>
+                    <Input type="number" value={newTask.slaHours} onChange={e => setNewTask({...newTask, slaHours: e.target.value})} />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label className="text-xs font-bold uppercase text-slate-500">Priority</Label>
+                    <select 
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      value={newTask.priority}
+                      onChange={e => setNewTask({...newTask, priority: e.target.value})}
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                    </select>
+                  </div>
                 </div>
                 <div className="grid gap-2"><Label className="text-xs font-bold uppercase text-slate-500">Required Columns (comma separated)</Label><Input placeholder="Email, Name, ID" value={newTask.dataFields} onChange={e => setNewTask({...newTask, dataFields: e.target.value})} /></div>
               </div>

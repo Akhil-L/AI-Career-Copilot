@@ -27,7 +27,15 @@ export default function ClientDashboard() {
   const { currentUser, tasks, clientSubmitTask } = useStore();
   const { toast } = useToast();
   const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
-  const [newTask, setNewTask] = useState({ title: "", description: "", payPerRow: "0.10", dataFields: "", maxRows: "100" });
+  const [newTask, setNewTask] = useState({ 
+    title: "", 
+    description: "", 
+    payPerRow: "0.10", 
+    dataFields: "", 
+    maxRows: "100",
+    slaHours: "48",
+    priority: "medium"
+  });
 
   if (!currentUser || currentUser.role !== "client") {
     return (
@@ -58,10 +66,13 @@ export default function ClientDashboard() {
       payPerRow: parseFloat(newTask.payPerRow),
       maxRows: parseInt(newTask.maxRows),
       dataFields: newTask.dataFields.split(",").map(s => s.trim()),
-      sourceDataUrl: "/data/client_source_data.csv" // Mock source file
+      sourceDataUrl: "/data/client_source_data.csv",
+      slaHours: parseInt(newTask.slaHours),
+      priority: newTask.priority as any,
+      revisionPolicy: "Standard"
     });
     setIsNewTaskOpen(false);
-    toast({ title: "Task Submitted", description: "Your task is now pending admin review." });
+    toast({ title: "Task Submitted", description: "Your project is queued for review with the requested SLA." });
   };
 
   return (
@@ -87,6 +98,24 @@ export default function ClientDashboard() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2"><Label>Budget per Row ($)</Label><Input type="number" step="0.01" value={newTask.payPerRow} onChange={e => setNewTask({...newTask, payPerRow: e.target.value})} /></div>
                   <div className="grid gap-2"><Label>Estimated Rows</Label><Input type="number" value={newTask.maxRows} onChange={e => setNewTask({...newTask, maxRows: e.target.value})} /></div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label>Desired Turnaround (Hours)</Label>
+                    <Input type="number" value={newTask.slaHours} onChange={e => setNewTask({...newTask, slaHours: e.target.value})} />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>Priority Level</Label>
+                    <select 
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      value={newTask.priority}
+                      onChange={e => setNewTask({...newTask, priority: e.target.value})}
+                    >
+                      <option value="low">Standard</option>
+                      <option value="medium">Expedited</option>
+                      <option value="high">Urgent (Priority SLA)</option>
+                    </select>
+                  </div>
                 </div>
                 <div className="grid gap-2"><Label>Required Columns (comma separated)</Label><Input placeholder="Name, Email, Status" value={newTask.dataFields} onChange={e => setNewTask({...newTask, dataFields: e.target.value})} /></div>
                 <div className="grid gap-2">

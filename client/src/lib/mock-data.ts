@@ -39,13 +39,16 @@ export interface Task {
   description: string;
   payPerRow: number;
   status: "pending_review" | "open" | "assigned" | "submitted" | "approved" | "rejected";
-  clientId?: string; // NEW: Reference to User.id (client)
+  clientId?: string; 
   assignedTo?: string; 
   dataFields: string[];
   maxRows: number;
   createdAt: string;
   sourceDataUrl?: string; 
   validWarehouseNames?: string[]; 
+  slaHours?: number; // Target turnaround time
+  revisionPolicy?: string; // e.g. "Standard", "Strict"
+  priority?: "low" | "medium" | "high";
 }
 
 export interface Submission {

@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Link, useLocation } from "wouter";
-import { DollarSign, Clock, CheckCircle2, TrendingUp, ArrowRight, FileText, ShieldAlert, GraduationCap, AlertTriangle, Star, Award, BarChart3 } from "lucide-react";
+import { DollarSign, Clock, CheckCircle2, TrendingUp, ArrowRight, FileText, ShieldAlert, GraduationCap, AlertTriangle, Star, Award, BarChart3, Zap, ShieldCheck } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 const MOCK_CHART_DATA = [
@@ -289,27 +289,42 @@ function TaskCard({ task, actionLabel, onAction, linkTo, variant, disabled }: { 
     <CardWrapper>
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start gap-2">
-          <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-50 mb-2">
-            Data Entry
-          </Badge>
+          <div className="flex flex-col gap-1">
+            <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-50 w-fit">
+              Data Entry
+            </Badge>
+            {task.priority === 'high' && (
+              <Badge className="bg-red-50 text-red-700 border-red-100 w-fit text-[10px] h-5">
+                <Zap className="h-3 w-3 mr-1" /> Priority SLA
+              </Badge>
+            )}
+          </div>
           <span className="font-mono font-bold text-green-600 bg-green-50 px-2 py-1 rounded text-sm">
             ${task.payPerRow.toFixed(2)}/row
           </span>
         </div>
-        <CardTitle className="text-lg leading-tight">{task.title}</CardTitle>
+        <CardTitle className="text-lg leading-tight mt-2">{task.title}</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 pb-3">
         <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
           {task.description}
         </p>
-        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            <span>10 min est.</span>
+        <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-xs text-muted-foreground border-t pt-3">
+          <div className="flex items-center gap-1.5">
+            <Clock className="h-3.5 w-3.5 text-blue-500" />
+            <span>{task.slaHours || 24}h Turnaround</span>
           </div>
-          <div className="flex items-center gap-1">
-            <FileText className="h-3 w-3" />
-            <span>{task.dataFields.length} fields</span>
+          <div className="flex items-center gap-1.5">
+            <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+            <span>{task.revisionPolicy || "Standard"} SLA</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <FileText className="h-3.5 w-3.5 text-slate-400" />
+            <span>{task.dataFields.length} Fields</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <TrendingUp className="h-3.5 w-3.5 text-purple-400" />
+            <span>{task.maxRows} Max Rows</span>
           </div>
         </div>
       </CardContent>
