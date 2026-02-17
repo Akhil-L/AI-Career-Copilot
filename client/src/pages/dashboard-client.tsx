@@ -132,80 +132,107 @@ export default function ClientDashboard() {
         </div>
 
         {/* Client Stats & Analytics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="border-slate-200">
-            <CardContent className="p-6">
-              <div className="p-2 rounded-lg bg-blue-50 text-blue-600 w-fit mb-4">
-                <Briefcase className="h-5 w-5" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <Card className="relative overflow-hidden transition-all duration-300 hover:translate-y-[-2px] hover:shadow-xl border border-slate-200/60 bg-white group rounded-2xl">
+            <CardContent className="p-8">
+              <div className="p-4 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100/50 w-fit mb-6 transition-transform group-hover:rotate-3">
+                <Briefcase className="h-6 w-6" />
               </div>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Active Projects</p>
-              <h3 className="text-2xl font-bold text-slate-900">{myTasks.length}</h3>
+              <p className="text-xs font-black uppercase tracking-[0.15em] text-slate-400 mb-1">Active Projects</p>
+              <h3 className="text-3xl font-black text-slate-900 tracking-tight">{myTasks.length}</h3>
             </CardContent>
           </Card>
-          <Card className="border-slate-200">
-            <CardContent className="p-6">
-              <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600 w-fit mb-4">
-                <TrendingUp className="h-5 w-5" />
+          <Card className="relative overflow-hidden transition-all duration-300 hover:translate-y-[-2px] hover:shadow-xl border border-slate-200/60 bg-white group rounded-2xl">
+            <CardContent className="p-8">
+              <div className="p-4 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100/50 w-fit mb-6 transition-transform group-hover:rotate-3">
+                <TrendingUp className="h-6 w-6" />
               </div>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Rows Processed</p>
-              <h3 className="text-2xl font-bold text-slate-900">{totalRowsRequested.toLocaleString()}</h3>
+              <p className="text-xs font-black uppercase tracking-[0.15em] text-slate-400 mb-1">Processed Volume</p>
+              <h3 className="text-3xl font-black text-slate-900 tracking-tight">{totalRowsRequested.toLocaleString()}</h3>
             </CardContent>
           </Card>
-          <Card className="border-slate-200">
-            <CardContent className="p-6">
-              <div className="p-2 rounded-lg bg-amber-50 text-amber-600 w-fit mb-4">
-                <Clock className="h-5 w-5" />
+          <Card className="relative overflow-hidden transition-all duration-300 hover:translate-y-[-2px] hover:shadow-xl border border-slate-200/60 bg-white group rounded-2xl">
+            <CardContent className="p-8">
+              <div className="p-4 rounded-2xl bg-amber-50 text-amber-600 border border-amber-100/50 w-fit mb-6 transition-transform group-hover:rotate-3">
+                <Clock className="h-6 w-6" />
               </div>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Pending Review</p>
-              <h3 className="text-2xl font-bold text-slate-900">{pendingProjects}</h3>
+              <p className="text-xs font-black uppercase tracking-[0.15em] text-slate-400 mb-1">Pending Review</p>
+              <h3 className="text-3xl font-black text-slate-900 tracking-tight">{pendingProjects}</h3>
             </CardContent>
           </Card>
-          <Card className="border-slate-200">
-            <CardContent className="p-6">
-              <div className="p-2 rounded-lg bg-purple-50 text-purple-600 w-fit mb-4">
-                <Users className="h-5 w-5" />
+          <Card className="relative overflow-hidden transition-all duration-300 hover:translate-y-[-2px] hover:shadow-xl border border-slate-200/60 bg-white group rounded-2xl">
+            <CardContent className="p-8">
+              <div className="p-4 rounded-2xl bg-purple-50 text-purple-600 border border-purple-100/50 w-fit mb-6 transition-transform group-hover:rotate-3">
+                <Users className="h-6 w-6" />
               </div>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Assigned Specialists</p>
-              <h3 className="text-2xl font-bold text-slate-900">12</h3>
+              <p className="text-xs font-black uppercase tracking-[0.15em] text-slate-400 mb-1">Active Specialists</p>
+              <h3 className="text-3xl font-black text-slate-900 tracking-tight">12</h3>
             </CardContent>
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-              <Search className="h-5 w-5 text-blue-600" /> Current Campaigns
-            </h2>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          <div className="lg:col-span-2 space-y-8">
+            <div className="flex items-center justify-between mb-2">
+              <div className="space-y-1">
+                <h2 className="text-2xl font-black text-slate-900">Campaign Manager</h2>
+                <p className="text-sm font-medium text-slate-500">Monitor real-time progress of your data projects</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Input className="pl-10 h-10 w-64 bg-white border-slate-200/60 rounded-xl font-medium text-sm focus:ring-blue-500/20" placeholder="Filter projects..." />
+                </div>
+              </div>
+            </div>
+            
             <div className="grid md:grid-cols-2 gap-6">
               {myTasks.length === 0 ? (
-                <div className="col-span-full py-20 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                  <FileText className="h-12 w-12 mx-auto text-slate-300 mb-4" />
-                  <h3 className="text-xl font-bold text-slate-900">No Projects Found</h3>
-                  <p className="text-slate-500">Start by submitting your first data entry project.</p>
+                <div className="col-span-full py-24 text-center bg-white border border-dashed border-slate-300 rounded-[2rem] gap-4 flex flex-col items-center">
+                  <div className="p-5 rounded-2xl bg-slate-50 text-slate-300">
+                    <FileText className="h-10 w-10 opacity-20" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-black text-slate-900">Deployment Pipeline Empty</h3>
+                    <p className="text-sm font-medium text-slate-500">Initialize your first campaign to begin data verification.</p>
+                  </div>
+                  <Button className="mt-4 bg-blue-600 hover:bg-blue-500 font-black rounded-xl px-8" onClick={() => setIsNewTaskOpen(true)}>
+                    Initialize Project
+                  </Button>
                 </div>
               ) : (
                 myTasks.map(task => (
-                  <Card key={task.id} className="hover:shadow-lg transition-all border-slate-100">
-                    <CardHeader className="pb-3">
-                      <div className="flex justify-between items-start mb-2">
-                        <Badge variant={task.status === "pending_review" ? "outline" : "secondary"} className={task.status === "pending_review" ? "text-amber-600 border-amber-200 bg-amber-50" : "bg-emerald-50 text-emerald-700"}>
-                          {task.status === "pending_review" ? "Review Pending" : task.status.toUpperCase()}
+                  <Card key={task.id} className="hover:shadow-2xl transition-all duration-500 border border-slate-200/60 bg-white group rounded-3xl premium-shadow hover:translate-y-[-4px] overflow-hidden">
+                    <CardHeader className="p-8 pb-4">
+                      <div className="flex justify-between items-start mb-4">
+                        <Badge variant="outline" className={`font-black text-[10px] uppercase tracking-widest px-3 py-1 rounded-full ${task.status === "pending_review" ? "text-amber-600 border-amber-200 bg-amber-50" : "text-emerald-600 border-emerald-200 bg-emerald-50"}`}>
+                          {task.status === "pending_review" ? "Auth Required" : "System Live"}
                         </Badge>
+                        <div className="p-2 rounded-xl bg-slate-50 text-slate-400 border border-slate-100 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                          <Plus className="h-4 w-4" />
+                        </div>
                       </div>
-                      <CardTitle className="text-lg">{task.title}</CardTitle>
+                      <CardTitle className="text-xl font-black text-slate-900 tracking-tight leading-snug">{task.title}</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-slate-500 flex items-center gap-1"><Clock className="h-4 w-4" /> {new Date(task.createdAt).toLocaleDateString()}</span>
-                        <span className="font-bold text-blue-600">${task.payPerRow.toFixed(2)} / row</span>
+                    <CardContent className="px-8 space-y-6">
+                      <div className="flex items-center justify-between text-[11px] font-black uppercase tracking-widest text-slate-400">
+                        <span className="flex items-center gap-2"><Clock className="h-3.5 w-3.5" /> {new Date(task.createdAt).toLocaleDateString()}</span>
+                        <span className="text-blue-600 font-black">${task.payPerRow.toFixed(2)} / UNIT</span>
                       </div>
-                      <div className="bg-slate-50 p-3 rounded-lg flex items-center justify-between">
-                        <span className="text-xs font-bold text-slate-500 uppercase">Progress</span>
-                        <span className="text-sm font-bold">{task.status === 'approved' ? '100%' : '0%'}</span>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-end mb-1">
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Verification Progress</span>
+                          <span className="text-sm font-black text-slate-900">{task.status === 'approved' ? '100%' : '0%'}</span>
+                        </div>
+                        <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                          <div className={`h-full bg-blue-600 transition-all duration-1000 ${task.status === 'approved' ? 'w-full' : 'w-0'}`} />
+                        </div>
                       </div>
                     </CardContent>
-                    <CardFooter>
-                      <Button variant="outline" className="w-full text-xs h-9">Configure Rules</Button>
+                    <CardFooter className="px-8 pb-8 pt-2">
+                      <Button variant="outline" className="w-full h-11 text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-slate-50 transition-all">
+                        Configure Protocol
+                      </Button>
                     </CardFooter>
                   </Card>
                 ))
@@ -213,47 +240,78 @@ export default function ClientDashboard() {
             </div>
           </div>
 
-          <div className="space-y-6">
-            <Card className="border-slate-200">
-              <CardHeader>
-                <CardTitle className="text-lg font-bold">Project Allocation</CardTitle>
-                <CardDescription>Status distribution of submitted data</CardDescription>
+          <div className="space-y-10">
+            <Card className="border-slate-200/60 premium-shadow rounded-[2rem] overflow-hidden bg-white">
+              <CardHeader className="p-8 pb-4 border-b border-slate-50">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600">
+                    <PieIcon className="h-5 w-5" />
+                  </div>
+                  <CardTitle className="text-sm font-black uppercase tracking-[0.2em] text-slate-900">Asset Distribution</CardTitle>
+                </div>
+                <CardDescription className="font-medium text-slate-500">Real-time status of your global data pipeline</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0">
-                <div className="h-[240px] w-full">
+              <CardContent className="p-8 pt-0">
+                <div className="h-[280px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
                         data={PIE_DATA}
                         cx="50%"
                         cy="50%"
-                        innerRadius={60}
-                        outerRadius={80}
-                        paddingAngle={5}
+                        innerRadius={70}
+                        outerRadius={95}
+                        paddingAngle={8}
                         dataKey="value"
+                        stroke="none"
                       >
                         {PIE_DATA.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
-                      <Tooltip />
-                      <Legend verticalAlign="bottom" height={36}/>
+                      <Tooltip 
+                        contentStyle={{ 
+                          borderRadius: '16px', 
+                          border: 'none', 
+                          boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)',
+                          padding: '12px 16px',
+                          fontWeight: 800,
+                          fontSize: '12px'
+                        }}
+                      />
                     </PieChart>
                   </ResponsiveContainer>
+                </div>
+                <div className="grid grid-cols-3 gap-4 mt-4">
+                  {PIE_DATA.map((item, i) => (
+                    <div key={i} className="text-center space-y-1">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{item.name}</p>
+                      <p className="text-sm font-black text-slate-900" style={{color: item.color}}>{item.value}</p>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-blue-600 text-white shadow-xl shadow-blue-200">
-              <CardHeader>
-                <CardTitle className="text-lg font-bold flex items-center gap-2">
-                  <PieIcon className="h-5 w-5" /> Enterprise Insights
+            <Card className="bg-gradient-to-br from-blue-600 to-blue-800 text-white premium-shadow rounded-[2rem] border-none overflow-hidden relative group">
+              <div className="absolute top-0 right-0 p-8 opacity-10 transition-transform group-hover:scale-125 group-hover:rotate-12">
+                <ShieldCheck className="h-32 w-32" />
+              </div>
+              <CardHeader className="p-10 pb-4">
+                <CardTitle className="text-xl font-black flex items-center gap-3 tracking-tight">
+                  <div className="p-2.5 rounded-xl bg-white/10 border border-white/20 backdrop-blur-sm">
+                    <CheckCircle2 className="h-5 w-5" />
+                  </div>
+                  Enterprise Grade
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm text-blue-100 leading-relaxed">
-                  Your projects are being handled by <span className="text-white font-bold">Verified</span> specialists, maintaining a <span className="text-white font-bold">99.4%</span> verification accuracy rate.
+              <CardContent className="p-10 pt-4">
+                <p className="text-blue-100 font-medium leading-relaxed">
+                  Your projects are prioritized for <span className="text-white font-black underline underline-offset-4 decoration-blue-400 decoration-2">Verified Tier-1</span> specialists, ensuring a <span className="text-white font-black">99.4%</span> base accuracy.
                 </p>
+                <Button className="mt-8 w-full h-12 bg-white text-blue-600 hover:bg-blue-50 font-black rounded-2xl shadow-xl shadow-blue-900/20">
+                  Upgrade Service Level
+                </Button>
               </CardContent>
             </Card>
           </div>

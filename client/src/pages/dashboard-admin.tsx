@@ -170,29 +170,36 @@ export default function AdminDashboard() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
-            <Card className="border-slate-200">
-              <CardHeader className="flex flex-row items-center justify-between">
+          <div className="lg:col-span-2 space-y-10">
+            <Card className="border-slate-200/60 premium-shadow rounded-3xl overflow-hidden bg-white">
+              <CardHeader className="flex flex-row items-center justify-between pb-4 border-b border-slate-50 px-8 pt-8">
                 <div>
-                  <CardTitle className="text-lg font-bold">Platform Throughput</CardTitle>
-                  <CardDescription>Monthly data submission volume across all campaigns</CardDescription>
+                  <CardTitle className="text-xl font-black text-slate-900">Platform Throughput</CardTitle>
+                  <CardDescription className="font-medium text-slate-500 mt-1">Monthly data submission volume across all campaigns</CardDescription>
                 </div>
-                <Activity className="h-5 w-5 text-slate-400" />
+                <div className="p-3 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100/50">
+                  <Activity className="h-6 w-6" />
+                </div>
               </CardHeader>
-              <CardContent className="pt-4">
-                <div className="h-[300px] w-full">
+              <CardContent className="px-6 pb-8 pt-10">
+                <div className="h-[320px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={MOCK_PLATFORM_DATA}>
+                    <BarChart data={MOCK_PLATFORM_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                      <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 11, fontWeight: 700}} dy={15} />
+                      <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 11, fontWeight: 700}} />
                       <Tooltip 
-                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                        contentStyle={{ 
+                          borderRadius: '16px', 
+                          border: 'none', 
+                          boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)',
+                          padding: '12px 16px' 
+                        }}
                         cursor={{fill: '#f8fafc'}}
                       />
-                      <Bar dataKey="submissions" radius={[4, 4, 0, 0]}>
+                      <Bar dataKey="submissions" radius={[6, 6, 0, 0]} barSize={40}>
                         {MOCK_PLATFORM_DATA.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={index === MOCK_PLATFORM_DATA.length - 1 ? '#2563eb' : '#cbd5e1'} />
+                          <Cell key={`cell-${index}`} fill={index === MOCK_PLATFORM_DATA.length - 1 ? '#2563eb' : '#e2e8f0'} />
                         ))}
                       </Bar>
                     </BarChart>
@@ -202,20 +209,26 @@ export default function AdminDashboard() {
             </Card>
 
             <Tabs defaultValue="submissions" className="w-full">
-          <TabsList className="bg-white border p-1 h-12 mb-6">
-            <TabsTrigger value="client-tasks" className="data-[state=active]:bg-primary data-[state=active]:text-white px-8">
-              New Project Requests ({tasks.filter(t => t.status === 'pending_review').length})
-            </TabsTrigger>
-            <TabsTrigger value="submissions" className="data-[state=active]:bg-primary data-[state=active]:text-white px-8">
-              Work Reviews ({pendingSubmissions.length})
-            </TabsTrigger>
-            <TabsTrigger value="payouts" className="data-[state=active]:bg-primary data-[state=active]:text-white px-8">
-              Payout Queue ({pendingPayouts.length})
-            </TabsTrigger>
-            <TabsTrigger value="workers" className="data-[state=active]:bg-primary data-[state=active]:text-white px-8">
-              Worker Ranks
-            </TabsTrigger>
-          </TabsList>
+              <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                <div className="space-y-1">
+                  <h2 className="text-2xl font-black text-slate-900">Operations Control</h2>
+                  <p className="text-sm font-medium text-slate-500">Monitor and authorize platform-wide activity</p>
+                </div>
+                <TabsList className="bg-slate-100 p-1.5 rounded-2xl border border-slate-200/50 h-auto overflow-x-auto justify-start">
+                  <TabsTrigger value="submissions" className="rounded-xl px-5 py-2.5 font-black text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600 transition-all whitespace-nowrap">
+                    Review Queue ({pendingSubmissions.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="client-tasks" className="rounded-xl px-5 py-2.5 font-black text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600 transition-all whitespace-nowrap">
+                    Project Requests
+                  </TabsTrigger>
+                  <TabsTrigger value="payouts" className="rounded-xl px-5 py-2.5 font-black text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600 transition-all whitespace-nowrap">
+                    Payouts ({pendingPayouts.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="workers" className="rounded-xl px-5 py-2.5 font-black text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600 transition-all whitespace-nowrap">
+                    Specialists
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
           <TabsContent value="workers">
             <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
@@ -444,45 +457,56 @@ export default function AdminDashboard() {
             </Tabs>
           </div>
 
-          <div className="space-y-6">
-            <Card className="border-slate-200">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg font-bold">Platform Activity</CardTitle>
-                <CardDescription>Live system events</CardDescription>
+          <div className="space-y-10">
+            <Card className="border-slate-200/60 premium-shadow rounded-[2rem] overflow-hidden bg-white">
+              <CardHeader className="p-8 pb-4 border-b border-slate-50">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600">
+                    <Activity className="h-5 w-5" />
+                  </div>
+                  <CardTitle className="text-sm font-black uppercase tracking-[0.2em] text-slate-900">Live Telemetry</CardTitle>
+                </div>
               </CardHeader>
-              <CardContent className="space-y-4 pt-4">
+              <CardContent className="p-8 space-y-8">
                 {[
-                  { title: 'Enterprise Project', desc: 'Acme Corp submitted "Q2 Audit"', time: 'Just now', icon: Activity, color: 'text-blue-500 bg-blue-50' },
-                  { title: 'Payout Released', desc: 'Sarah Worker: $75.50 released', time: '12m ago', icon: CreditCard, color: 'text-emerald-500 bg-emerald-50' },
-                  { title: 'System Audit', desc: 'Manual review of Batch #449 completed', time: '45m ago', icon: ShieldCheck, color: 'text-purple-500 bg-purple-50' },
-                  { title: 'New Specialist', desc: 'Michael R. passed Module 4', time: '1h ago', icon: GraduationCap, color: 'text-amber-500 bg-amber-50' },
+                  { title: 'Enterprise Project', desc: 'Acme Corp submitted "Q2 Audit"', time: 'Just now', icon: Activity, color: 'text-blue-600 bg-blue-50 border-blue-100' },
+                  { title: 'Payout Released', desc: 'Sarah Worker: $75.50 released', time: '12m ago', icon: CreditCard, color: 'text-emerald-600 bg-emerald-50 border-emerald-100' },
+                  { title: 'System Audit', desc: 'Manual review of Batch #449 completed', time: '45m ago', icon: ShieldCheck, color: 'text-purple-600 bg-purple-50 border-purple-100' },
+                  { title: 'New Specialist', desc: 'Michael R. passed Module 4', time: '1h ago', icon: GraduationCap, color: 'text-amber-600 bg-amber-50 border-amber-100' },
                 ].map((item, i) => (
-                  <div key={i} className="flex gap-4">
-                    <div className={`mt-1 h-8 w-8 rounded-lg ${item.color} flex items-center justify-center shrink-0`}>
-                      <item.icon className="h-4 w-4" />
+                  <div key={i} className="flex gap-6 group cursor-default">
+                    <div className={`mt-1 h-12 w-12 rounded-2xl border ${item.color} flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 group-hover:rotate-3 shadow-sm`}>
+                      <item.icon className="h-5 w-5" />
                     </div>
-                    <div className="space-y-1">
-                      <p className="text-sm font-bold text-slate-900">{item.title}</p>
-                      <p className="text-xs text-slate-500 leading-tight">{item.desc}</p>
-                      <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">{item.time}</p>
+                    <div className="space-y-1 flex-1">
+                      <div className="flex justify-between items-start">
+                        <p className="text-sm font-black text-slate-900 tracking-tight">{item.title}</p>
+                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{item.time}</p>
+                      </div>
+                      <p className="text-xs text-slate-500 font-medium leading-relaxed">{item.desc}</p>
                     </div>
                   </div>
                 ))}
               </CardContent>
-              <CardFooter className="pt-2 border-t mt-2">
-                <Button variant="ghost" size="sm" className="w-full text-xs text-slate-500 font-bold">
-                  Download Event Log <ArrowUpRight className="ml-1 h-3 w-3" />
+              <CardFooter className="p-8 pt-0">
+                <Button variant="ghost" className="w-full rounded-2xl h-12 font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all">
+                  Access Master Logs <ArrowUpRight className="ml-2 h-3 w-3" />
                 </Button>
               </CardFooter>
             </Card>
 
-            <Card className="bg-slate-50 border-slate-200 border-dashed">
-              <CardContent className="p-6 text-center space-y-3">
-                <div className="p-3 bg-white rounded-full border border-slate-200 w-fit mx-auto shadow-sm text-blue-600">
-                  <TrendingUp className="h-6 w-6" />
+            <Card className="bg-gradient-to-br from-slate-900 to-slate-800 border-none rounded-[2rem] premium-shadow overflow-hidden relative group">
+              <div className="absolute top-0 right-0 p-8 opacity-10 transition-transform group-hover:scale-125 group-hover:rotate-12">
+                <TrendingUp className="h-32 w-32 text-white" />
+              </div>
+              <CardContent className="p-10 relative z-10 space-y-4">
+                <div className="p-3 bg-white/10 rounded-2xl border border-white/20 w-fit backdrop-blur-md">
+                  <TrendingUp className="h-6 w-6 text-blue-400" />
                 </div>
-                <h4 className="font-bold text-slate-900">Efficiency Insights</h4>
-                <p className="text-sm text-slate-500">Average approval time has decreased by <span className="text-emerald-600 font-bold">14%</span> this week.</p>
+                <h4 className="font-black text-xl text-white tracking-tight">Efficiency Protocol</h4>
+                <p className="text-sm text-slate-300 font-medium leading-relaxed">
+                  Average approval latency has decreased by <span className="text-emerald-400 font-black">14.2%</span> this fiscal cycle through automated pre-sorting.
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -494,24 +518,34 @@ export default function AdminDashboard() {
 
 function AnalyticsCard({ title, value, icon: Icon, color }: { title: string, value: string, icon: any, color: string }) {
   const colors: Record<string, string> = {
-    blue: "bg-blue-50 text-blue-600 border-blue-100",
-    orange: "bg-orange-50 text-orange-600 border-orange-100",
-    emerald: "bg-emerald-50 text-emerald-600 border-emerald-100",
-    slate: "bg-slate-100 text-slate-600 border-slate-200"
+    blue: "bg-blue-50 text-blue-600 border-blue-100/50",
+    orange: "bg-orange-50 text-orange-600 border-orange-100/50",
+    emerald: "bg-emerald-50 text-emerald-600 border-emerald-100/50",
+    slate: "bg-slate-100 text-slate-600 border-slate-200/50"
   };
 
   return (
-    <Card className="border-slate-200 shadow-sm bg-white">
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className={`p-2 rounded-lg border ${colors[color]}`}>
-            <Icon className="h-5 w-5" />
+    <Card className="relative overflow-hidden transition-all duration-500 hover:translate-y-[-4px] hover:shadow-2xl border border-slate-200/60 bg-white group rounded-[2rem] premium-shadow">
+      <CardContent className="p-10">
+        <div className="flex items-center justify-between mb-8">
+          <div className={`p-5 rounded-2xl border ${colors[color]} transition-all duration-300 group-hover:rotate-6 group-hover:scale-110 shadow-sm`}>
+            <Icon className="h-7 w-7" />
           </div>
-          <TrendingUp className="h-4 w-4 text-slate-300" />
+          <div className="flex flex-col items-end">
+            <Badge variant="outline" className="text-[10px] font-black text-emerald-600 bg-emerald-50 border-emerald-100 px-3 py-1 rounded-full flex items-center gap-1.5 uppercase tracking-widest">
+              <TrendingUp className="h-3 w-3" /> +12.5%
+            </Badge>
+          </div>
         </div>
-        <div>
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">{title}</p>
-          <h3 className="text-2xl font-bold text-slate-900">{value}</h3>
+        <div className="space-y-1">
+          <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 mb-2">{title}</p>
+          <h3 className="text-4xl font-black text-slate-900 tracking-tighter">{value}</h3>
+        </div>
+        <div className="mt-6 pt-6 border-t border-slate-50 flex items-center justify-between">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Live Audit</span>
+          <div className="flex gap-1">
+            {[1,2,3].map(i => <div key={i} className="h-1 w-3 rounded-full bg-slate-100 group-hover:bg-blue-200 transition-colors" style={{transitionDelay: `${i*100}ms`}} />)}
+          </div>
         </div>
       </CardContent>
     </Card>
