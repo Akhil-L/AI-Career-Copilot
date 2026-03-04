@@ -12,7 +12,8 @@ import {
   ChevronRight,
   Globe,
   Shield,
-  Briefcase
+  Briefcase,
+  User
 } from "lucide-react";
 import { useState } from "react";
 import { 
@@ -38,6 +39,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         { label: "Work Hub", href: "/dashboard", icon: LayoutDashboard },
         { label: "Academy", href: "/training", icon: GraduationCap },
         { label: "Earnings", href: "/payouts", icon: CreditCard },
+        { label: "My Profile", href: "/profile", icon: User },
       ];
 
   const publicLinks = [
@@ -146,6 +148,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
                         <span className="text-xs font-medium text-slate-500 truncate">{currentUser.email}</span>
                       </div>
                       <DropdownMenuSeparator className="bg-slate-100 mb-2" />
+                      {currentUser.role === 'worker' && (
+                        <DropdownMenuItem className="font-bold cursor-pointer p-3 rounded-xl transition-colors" onClick={() => setLocation("/profile")}>
+                          <User className="h-4 w-4 mr-3" /> View Profile
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem className="text-red-600 font-bold focus:bg-red-50 focus:text-red-600 cursor-pointer p-3 rounded-xl transition-colors" onClick={() => { logout(); setLocation("/"); }}>
                         <LogOut className="h-4 w-4 mr-3" /> Sign Out
                       </DropdownMenuItem>

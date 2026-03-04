@@ -76,16 +76,33 @@ export default function TrainingPage() {
     if (passed) {
       completeModule(activeModule.id);
       toast({
-        title: "Module Passed!",
-        description: `Score: ${Math.round(score * 100)}%. Module completed.`,
-        className: "bg-emerald-600 text-white border-emerald-700"
+        title: "Module Authorized",
+        description: `Score: ${Math.round(score * 100)}%. Qualification updated.`,
+        className: "bg-emerald-600 text-white border-none rounded-2xl font-black uppercase tracking-tight"
       });
     } else {
       toast({
-        title: "Module Failed",
+        title: "Authorization Failed",
         description: `Score: ${Math.round(score * 100)}%. Required: ${Math.round(activeModule.passingScore * 100)}%.`,
-        variant: "destructive"
+        variant: "destructive",
+        className: "rounded-2xl font-black uppercase tracking-tight"
       });
+    }
+  };
+
+  const handleNextModule = () => {
+    const currentIndex = TRAINING_MODULES.findIndex(m => m.id === activeModule?.id);
+    if (currentIndex < TRAINING_MODULES.length - 1) {
+      handleStartModule(TRAINING_MODULES[currentIndex + 1]);
+    } else {
+      setActiveModule(null);
+    }
+  };
+
+  const handlePrevModule = () => {
+    const currentIndex = TRAINING_MODULES.findIndex(m => m.id === activeModule?.id);
+    if (currentIndex > 0) {
+      handleStartModule(TRAINING_MODULES[currentIndex - 1]);
     }
   };
 
@@ -94,182 +111,238 @@ export default function TrainingPage() {
 
   return (
     <Layout>
-      <div className="max-w-5xl mx-auto space-y-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-heading font-bold text-slate-900 flex items-center gap-3">
-              <ShieldCheck className="h-8 w-8 text-primary" />
-              Advanced Academy
+      <div className="max-w-6xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
+        <div className="flex flex-col md:flex-row justify-between items-end gap-8">
+          <div className="space-y-3">
+            <Badge className="bg-blue-600 text-white font-black text-[10px] uppercase tracking-[0.2em] px-3 py-1 mb-2">Lexington Academy</Badge>
+            <h1 className="text-4xl font-black tracking-tight text-slate-900 flex items-center gap-4">
+              <ShieldCheck className="h-10 w-10 text-blue-600" />
+              Specialist Certification
             </h1>
-            <p className="text-slate-500">Master data auditing and ethical handling to unlock work.</p>
+            <p className="text-slate-500 font-medium text-lg max-w-xl">Advance through our proprietary verification protocols to unlock Tier-1 mission opportunities.</p>
           </div>
-          <Card className="bg-slate-50 border-slate-200 w-full md:w-64 shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex justify-between text-xs font-bold uppercase text-slate-500 mb-2">
-                <span>Certification Progress</span>
-                <span>{Math.round(progressPercent)}%</span>
+          <Card className="bg-white border-slate-200/60 premium-shadow w-full md:w-80 rounded-[2rem] overflow-hidden">
+            <CardContent className="p-8">
+              <div className="flex justify-between items-end mb-4">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Academy Completion</span>
+                <span className="text-2xl font-black text-slate-900 tracking-tight">{Math.round(progressPercent)}%</span>
               </div>
-              <Progress value={progressPercent} className="h-2" />
+              <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-blue-600 to-blue-400 transition-all duration-1000 ease-out" style={{ width: `${progressPercent}%` }} />
+              </div>
+              <p className="mt-4 text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-2">
+                <Target className="h-3 w-3" /> {completedCount} / {TRAINING_MODULES.length} Modules Verified
+              </p>
             </CardContent>
           </Card>
         </div>
 
         {isFullyTrained && (
-          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-6 flex flex-col md:flex-row items-center gap-6 animate-in zoom-in-95">
-            <div className="p-3 bg-emerald-100 rounded-full text-emerald-600">
-              <Trophy className="h-10 w-10" />
+          <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 border-none rounded-[2.5rem] p-10 flex flex-col md:flex-row items-center gap-10 shadow-2xl shadow-emerald-500/20 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-10 opacity-10 transition-transform group-hover:scale-125 group-hover:rotate-12">
+              <Trophy className="h-48 w-48 text-white" />
             </div>
-            <div className="flex-1 text-center md:text-left">
-              <h3 className="text-xl font-bold text-emerald-900">Certified Auditor!</h3>
-              <p className="text-emerald-700">You've completed the advanced curriculum. Your high accuracy score is now recognized.</p>
+            <div className="p-6 bg-white/10 rounded-[2rem] text-white backdrop-blur-md border border-white/20 shadow-xl relative z-10">
+              <Trophy className="h-12 w-12" />
             </div>
-            <Button onClick={() => setLocation("/dashboard")} className="bg-emerald-600 hover:bg-emerald-500 font-bold px-8 h-12 shadow-lg shadow-emerald-200">
-              Unlock Tasks
+            <div className="flex-1 text-center md:text-left relative z-10">
+              <h3 className="text-3xl font-black text-white tracking-tight mb-2">Tier-1 Certification Secured</h3>
+              <p className="text-emerald-100 font-medium text-lg leading-relaxed max-w-xl">Your identity and skills have been cryptographically verified. Access to high-yield enterprise vaults is now authorized.</p>
+            </div>
+            <Button onClick={() => setLocation("/dashboard")} className="bg-white text-emerald-700 hover:bg-emerald-50 font-black px-10 h-14 rounded-2xl shadow-xl transition-all relative z-10 text-xs uppercase tracking-[0.2em]">
+              Access Vaults
             </Button>
           </div>
         )}
 
         {activeModule ? (
-          <div className="grid md:grid-cols-3 gap-8 items-start animate-in slide-in-from-bottom-4">
-            <Card className="md:col-span-2 border-primary/20 shadow-xl overflow-hidden bg-white">
-              <CardHeader className="bg-slate-50 border-b">
-                <div className="flex justify-between items-center mb-2">
-                  <Badge variant="outline" className="text-primary border-primary/20">Module {TRAINING_MODULES.indexOf(activeModule) + 1}</Badge>
-                  <Button variant="ghost" size="sm" onClick={() => setActiveModule(null)}>Exit Module</Button>
+          <div className="grid lg:grid-cols-4 gap-12 items-start animate-in slide-in-from-bottom-8 duration-500">
+            <Card className="lg:col-span-3 border-slate-200/60 premium-shadow rounded-[2.5rem] overflow-hidden bg-white min-h-[600px] flex flex-col">
+              <CardHeader className="p-10 border-b border-slate-50">
+                <div className="flex justify-between items-center mb-6">
+                  <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50 font-black text-[10px] uppercase tracking-widest px-4 py-1.5 rounded-full">Protocol {TRAINING_MODULES.indexOf(activeModule) + 1}</Badge>
+                  <Button variant="ghost" size="sm" className="font-black text-[10px] uppercase tracking-widest text-slate-400 hover:text-red-600 transition-colors" onClick={() => setActiveModule(null)}>Abort Module</Button>
                 </div>
-                <CardTitle className="text-2xl font-heading">{activeModule.title}</CardTitle>
-                <div className="flex gap-4 text-xs font-medium text-slate-500">
-                  <span className="flex items-center gap-1"><Trophy className="h-3 w-3" /> Passing Score: {Math.round(activeModule.passingScore * 100)}%</span>
-                  <span className="flex items-center gap-1"><AlertCircle className="h-3 w-3" /> Attempts Used: {currentAttempts}/{activeModule.maxAttempts}</span>
+                <CardTitle className="text-4xl font-black text-slate-900 tracking-tight leading-tight">{activeModule.title}</CardTitle>
+                <div className="flex gap-6 mt-6">
+                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <Trophy className="h-3.5 w-3.5 text-blue-600" /> Threshold: {Math.round(activeModule.passingScore * 100)}%
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <AlertCircle className="h-3.5 w-3.5 text-blue-600" /> Attempts: {currentAttempts} / {activeModule.maxAttempts}
+                  </div>
                 </div>
               </CardHeader>
               
               {!showQuiz ? (
                 <>
-                  <CardContent className="py-8 prose prose-slate max-w-none">
-                    <div className="text-lg leading-relaxed text-slate-700 space-y-4">
+                  <CardContent className="p-10 flex-1 prose prose-slate max-w-none">
+                    <div className="text-xl leading-relaxed text-slate-600 font-medium space-y-6">
                       {activeModule.content.split('\n').map((para, i) => (
-                        <p key={i}>{para}</p>
+                        <p key={i} className="mb-6">{para}</p>
                       ))}
                     </div>
                   </CardContent>
-                  <CardFooter className="bg-slate-50 border-t p-6 flex justify-end">
+                  <CardFooter className="p-10 border-t border-slate-50 flex justify-between bg-slate-50/30">
+                    <Button 
+                      variant="outline" 
+                      className="h-12 px-8 rounded-xl font-black text-[10px] uppercase tracking-widest border-slate-200"
+                      onClick={handlePrevModule}
+                      disabled={TRAINING_MODULES.indexOf(activeModule) === 0}
+                    >
+                      Previous Protocol
+                    </Button>
                     {isOutOfAttempts ? (
-                      <div className="flex items-center gap-2 text-red-600 font-bold bg-red-50 p-4 rounded-lg w-full">
-                        <XCircle className="h-5 w-5" /> Maximum attempts reached. Contact support to reset.
+                      <div className="flex items-center gap-3 text-red-600 font-black text-[10px] uppercase tracking-widest bg-red-50 px-6 rounded-2xl border border-red-100 h-12">
+                        <XCircle className="h-4 w-4" /> Maximum Access Attempts Reached
                       </div>
                     ) : (
-                      <Button onClick={() => setShowQuiz(true)} className="gap-2 h-12 px-8 font-bold shadow-lg shadow-primary/20">
-                        Start Practical Quiz <ChevronRight className="h-4 w-4" />
-                      </Button>
+                      <div className="flex gap-4">
+                         <Button 
+                          variant="ghost"
+                          className="h-12 px-8 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-400"
+                          onClick={handleNextModule}
+                          disabled={TRAINING_MODULES.indexOf(activeModule) === TRAINING_MODULES.length - 1}
+                        >
+                          Skip Content
+                        </Button>
+                        <Button onClick={() => setShowQuiz(true)} className="bg-blue-600 hover:bg-blue-500 h-12 px-10 font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-blue-500/20 group">
+                          Initialize Verification <ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                        </Button>
+                      </div>
                     )}
                   </CardFooter>
                 </>
               ) : quizResults ? (
-                <CardContent className="py-12 text-center space-y-6">
-                  <div className={`mx-auto p-6 rounded-full w-24 h-24 flex items-center justify-center ${quizResults.passed ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
-                    {quizResults.passed ? <CheckCircle2 className="h-12 w-12" /> : <XCircle className="h-12 w-12" />}
+                <CardContent className="p-20 text-center space-y-10 flex-1 flex flex-col items-center justify-center">
+                  <div className={`p-8 rounded-[2rem] shadow-2xl ${quizResults.passed ? 'bg-emerald-50 text-emerald-600 shadow-emerald-500/10' : 'bg-red-50 text-red-600 shadow-red-500/10'}`}>
+                    {quizResults.passed ? <CheckCircle2 className="h-20 w-20" /> : <XCircle className="h-20 w-20" />}
                   </div>
                   <div className="space-y-2">
-                    <h2 className="text-3xl font-bold">{quizResults.passed ? "Success!" : "Not Quite..."}</h2>
-                    <p className="text-slate-500 text-lg">Your score: {Math.round(quizResults.score * 100)}%</p>
+                    <h2 className="text-4xl font-black text-slate-900 tracking-tight">{quizResults.passed ? "Authorization Secured" : "Verification Failed"}</h2>
+                    <p className="text-slate-500 text-lg font-medium">System Telemetry: Accuracy at {Math.round(quizResults.score * 100)}%</p>
                   </div>
                   
-                  <div className="max-w-md mx-auto space-y-4 text-left border rounded-xl p-4 bg-slate-50">
-                    <h4 className="font-bold text-sm uppercase text-slate-400">Review Feedback</h4>
-                    {activeModule.quiz.map((q, i) => (
-                      <div key={i} className="text-sm border-b pb-2 last:border-0">
-                        <p className="font-medium flex items-center gap-2">
-                          {parseInt(userAnswers[i]) === q.correctAnswer ? <CheckCircle2 className="h-3 w-3 text-emerald-500" /> : <XCircle className="h-3 w-3 text-red-500" />}
-                          {q.question}
-                        </p>
-                        <p className="text-slate-500 mt-1 italic">{q.explanation}</p>
-                      </div>
-                    ))}
+                  <div className="w-full max-w-xl text-left border border-slate-100 rounded-[2rem] p-8 bg-slate-50/50 space-y-6">
+                    <h4 className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
+                      <FileText className="h-4 w-4" /> Audit Log Feedback
+                    </h4>
+                    <div className="space-y-4">
+                      {activeModule.quiz.map((q, i) => (
+                        <div key={i} className="flex gap-4 items-start">
+                          <div className={`mt-1 p-1 rounded-full ${parseInt(userAnswers[i]) === q.correctAnswer ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
+                            {parseInt(userAnswers[i]) === q.correctAnswer ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                          </div>
+                          <div>
+                            <p className="text-sm font-black text-slate-900 leading-tight">{q.question}</p>
+                            <p className="text-xs text-slate-500 mt-1 font-medium italic">{q.explanation}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
-                  <div className="flex justify-center gap-3">
-                    <Button variant="outline" onClick={() => handleStartModule(activeModule)}>
-                      {quizResults.passed ? "Review Lesson" : "Retry Lesson"}
+                  <div className="flex gap-4">
+                    <Button variant="outline" className="h-12 px-8 rounded-xl font-black text-[10px] uppercase tracking-widest border-slate-200" onClick={() => handleStartModule(activeModule)}>
+                      {quizResults.passed ? "Review Content" : "Restart Protocol"}
                     </Button>
-                    {quizResults.passed && (
-                      <Button onClick={() => setActiveModule(null)}>Back to Modules</Button>
+                    {quizResults.passed ? (
+                      <Button onClick={handleNextModule} className="bg-blue-600 hover:bg-blue-500 h-12 px-10 font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-blue-500/20">
+                        {TRAINING_MODULES.indexOf(activeModule) === TRAINING_MODULES.length - 1 ? "Finish Certification" : "Next Protocol"}
+                      </Button>
+                    ) : (
+                      <Button onClick={() => setActiveModule(null)} variant="ghost" className="h-12 px-8 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-400">Exit</Button>
                     )}
                   </div>
                 </CardContent>
               ) : (
                 <>
-                  <CardContent className="py-8 space-y-8">
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center text-xs font-bold text-slate-400 uppercase tracking-widest">
-                        <span>Question {currentQuestionIndex + 1} of {activeModule.quiz.length}</span>
-                        <HelpCircle className="h-4 w-4" />
+                  <CardContent className="p-10 flex-1 space-y-12">
+                    <div className="space-y-8">
+                      <div className="flex justify-between items-end border-b border-slate-50 pb-6">
+                        <div className="space-y-1">
+                          <p className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em]">Verification Instance</p>
+                          <h4 className="text-2xl font-black text-slate-900 tracking-tight">Challenge {currentQuestionIndex + 1} of {activeModule.quiz.length}</h4>
+                        </div>
+                        <HelpCircle className="h-6 w-6 text-slate-200" />
                       </div>
-                      <h4 className="text-xl font-bold text-slate-900">{activeModule.quiz[currentQuestionIndex].question}</h4>
-                      <RadioGroup 
-                        onValueChange={(val) => setUserAnswers({...userAnswers, [currentQuestionIndex]: val})} 
-                        value={userAnswers[currentQuestionIndex] || ""}
-                        className="space-y-3"
-                      >
-                        {activeModule.quiz[currentQuestionIndex].options.map((option, i) => (
-                          <div key={i} className={`flex items-center space-x-3 p-4 border rounded-xl hover:bg-slate-50 transition-all ${userAnswers[currentQuestionIndex] === i.toString() ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'bg-white'}`}>
-                            <RadioGroupItem value={i.toString()} id={`opt-${i}`} />
-                            <Label htmlFor={`opt-${i}`} className="flex-1 cursor-pointer font-medium text-lg">{option}</Label>
-                          </div>
-                        ))}
-                      </RadioGroup>
+                      
+                      <div className="space-y-10">
+                        <p className="text-2xl font-black text-slate-800 leading-tight max-w-3xl">{activeModule.quiz[currentQuestionIndex].question}</p>
+                        <RadioGroup 
+                          onValueChange={(val) => setUserAnswers({...userAnswers, [currentQuestionIndex]: val})} 
+                          value={userAnswers[currentQuestionIndex] || ""}
+                          className="grid md:grid-cols-1 gap-4"
+                        >
+                          {activeModule.quiz[currentQuestionIndex].options.map((option, i) => (
+                            <div key={i} className={`flex items-center space-x-4 p-6 border-2 rounded-[1.5rem] transition-all duration-300 group cursor-pointer ${userAnswers[currentQuestionIndex] === i.toString() ? 'border-blue-600 bg-blue-50/30' : 'border-slate-100 bg-white hover:border-blue-200'}`} onClick={() => setUserAnswers({...userAnswers, [currentQuestionIndex]: i.toString()})}>
+                              <RadioGroupItem value={i.toString()} id={`opt-${i}`} className="h-5 w-5 border-2 text-blue-600" />
+                              <Label htmlFor={`opt-${i}`} className="flex-1 cursor-pointer font-black text-lg text-slate-900 group-hover:text-blue-700 transition-colors">{option}</Label>
+                            </div>
+                          ))}
+                        </RadioGroup>
+                      </div>
                     </div>
                   </CardContent>
-                  <CardFooter className="bg-slate-50 border-t p-6 flex justify-between">
+                  <CardFooter className="p-10 border-t border-slate-50 flex justify-between bg-slate-50/30">
                     <Button 
                       variant="ghost" 
+                      className="h-12 px-8 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-400"
                       onClick={() => setCurrentQuestionIndex(prev => prev - 1)} 
                       disabled={currentQuestionIndex === 0}
                     >
-                      Previous
+                      Previous Stage
                     </Button>
-                    {currentQuestionIndex < activeModule.quiz.length - 1 ? (
-                      <Button 
-                        onClick={() => setCurrentQuestionIndex(prev => prev + 1)}
-                        disabled={!userAnswers[currentQuestionIndex]}
-                      >
-                        Next Question
-                      </Button>
-                    ) : (
-                      <Button 
-                        onClick={handleQuizSubmit} 
-                        className="bg-primary hover:bg-primary/90 font-bold px-8 h-12"
-                        disabled={Object.keys(userAnswers).length < activeModule.quiz.length}
-                      >
-                        Finish & Submit
-                      </Button>
-                    )}
+                    <div className="flex items-center gap-4">
+                      <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mr-4">
+                        Phase {currentQuestionIndex + 1} / {activeModule.quiz.length}
+                      </div>
+                      {currentQuestionIndex < activeModule.quiz.length - 1 ? (
+                        <Button 
+                          className="h-12 px-10 font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl bg-slate-900 text-white hover:bg-slate-800 transition-all"
+                          onClick={() => setCurrentQuestionIndex(prev => prev + 1)}
+                          disabled={!userAnswers[currentQuestionIndex]}
+                        >
+                          Advance Phase <ChevronRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      ) : (
+                        <Button 
+                          onClick={handleQuizSubmit} 
+                          className="h-14 px-12 font-black text-[10px] uppercase tracking-[0.3em] rounded-2xl bg-blue-600 text-white shadow-2xl shadow-blue-500/20 hover:scale-[1.02] active:scale-95 transition-all"
+                          disabled={Object.keys(userAnswers).length < activeModule.quiz.length}
+                        >
+                          Authorize Submission
+                        </Button>
+                      )}
+                    </div>
                   </CardFooter>
                 </>
               )}
             </Card>
-            <div className="space-y-4">
-              <h3 className="font-bold text-slate-900 px-1 uppercase text-xs tracking-widest">Curriculum Details</h3>
-              {TRAINING_MODULES.map((m, idx) => (
-                <Card key={m.id} className={`p-4 ${m.id === activeModule.id ? 'border-primary ring-1 ring-primary' : 'opacity-60 grayscale bg-slate-50'}`}>
-                  <div className="flex gap-3">
-                    <div className="mt-0.5">
-                      {currentUser.completedModules.includes(m.id) ? (
-                        <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                      ) : (
-                        <div className="h-4 w-4 rounded-full border-2 border-slate-300" />
-                      )}
+
+            <div className="space-y-6">
+              <h3 className="font-black text-slate-900 px-2 uppercase text-[10px] tracking-[0.2em] text-slate-400">Curriculum Sequence</h3>
+              <div className="space-y-3">
+                {TRAINING_MODULES.map((m, idx) => {
+                  const isCompleted = currentUser.completedModules.includes(m.id);
+                  const isActive = m.id === activeModule.id;
+                  return (
+                    <div key={m.id} className={`p-5 rounded-2xl border transition-all duration-300 flex items-center gap-4 ${isActive ? 'bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-500/20 scale-[1.05]' : isCompleted ? 'bg-white border-slate-200 opacity-60' : 'bg-slate-50 border-slate-100 opacity-40'}`}>
+                      <div className={`h-8 w-8 rounded-xl flex items-center justify-center shrink-0 ${isActive ? 'bg-white/20' : isCompleted ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-200 text-slate-400'}`}>
+                        {isCompleted ? <CheckCircle2 className="h-4 w-4" /> : <div className="text-[10px] font-black">{idx + 1}</div>}
+                      </div>
+                      <div className="space-y-0.5">
+                        <p className={`text-xs font-black tracking-tight ${isActive ? 'text-white' : 'text-slate-900'}`}>{m.title}</p>
+                        {isActive && <p className="text-[9px] font-black uppercase tracking-widest text-blue-200">Current Phase</p>}
+                      </div>
                     </div>
-                    <div className="space-y-1">
-                      <p className="text-sm font-bold">{m.title}</p>
-                    </div>
-                  </div>
-                </Card>
-              ))}
+                  );
+                })}
+              </div>
             </div>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {TRAINING_MODULES.map((module, index) => {
               const isCompleted = currentUser.completedModules.includes(module.id);
               const isLocked = index > 0 && !currentUser.completedModules.includes(TRAINING_MODULES[index - 1].id);
@@ -278,44 +351,40 @@ export default function TrainingPage() {
               return (
                 <Card 
                   key={module.id} 
-                  className={`flex flex-col h-full transition-all duration-300 border-slate-200 bg-white ${isLocked ? 'opacity-70 bg-slate-50 shadow-none' : 'hover:shadow-xl hover:border-primary/20'}`}
+                  className={`flex flex-col h-full transition-all duration-500 border-slate-200/60 bg-white rounded-[2.5rem] overflow-hidden group ${isLocked ? 'opacity-50 grayscale pointer-events-none' : 'hover:shadow-2xl hover:translate-y-[-8px] premium-shadow'}`}
                 >
-                  <CardHeader>
-                    <div className="flex justify-between items-start mb-2">
-                      <div className={`p-2.5 rounded-xl ${isCompleted ? 'bg-emerald-50 text-emerald-600' : isLocked ? 'bg-slate-100 text-slate-400' : 'bg-blue-50 text-blue-600'}`}>
-                        {isCompleted ? <CheckCircle2 className="h-6 w-6" /> : isLocked ? <Lock className="h-6 w-6" /> : <GraduationCap className="h-6 w-6" />}
+                  <CardHeader className="p-8 pb-4">
+                    <div className="flex justify-between items-start mb-6">
+                      <div className={`p-4 rounded-2xl transition-transform group-hover:rotate-6 group-hover:scale-110 ${isCompleted ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : isLocked ? 'bg-slate-50 text-slate-300' : 'bg-blue-50 text-blue-600 border border-blue-100'}`}>
+                        {isCompleted ? <CheckCircle2 className="h-7 w-7" /> : isLocked ? <Lock className="h-7 w-7" /> : <GraduationCap className="h-7 w-7" />}
                       </div>
-                      <div className="flex flex-col items-end gap-1">
-                        {isCompleted && <Badge className="bg-emerald-500 text-white border-0">Passed</Badge>}
-                        {!isCompleted && !isLocked && attempts > 0 && <Badge variant="outline" className="text-[10px]">{attempts}/{module.maxAttempts} Tries</Badge>}
+                      <div className="flex flex-col items-end gap-2">
+                        {isCompleted && <Badge className="bg-emerald-50 text-emerald-600 border-emerald-200 font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-full">Authorized</Badge>}
+                        {!isCompleted && !isLocked && attempts > 0 && <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest text-slate-400 px-3 py-1 rounded-full">{attempts} / {module.maxAttempts} Tries</Badge>}
                       </div>
                     </div>
-                    <CardTitle className="text-xl font-heading">{module.title}</CardTitle>
-                    <CardDescription className="line-clamp-2">{module.description}</CardDescription>
+                    <CardTitle className="text-2xl font-black text-slate-900 tracking-tight leading-tight group-hover:text-blue-600 transition-colors">{module.title}</CardTitle>
+                    <CardDescription className="font-medium text-slate-500 mt-2 line-clamp-2">{module.description}</CardDescription>
                   </CardHeader>
-                  <CardContent className="flex-1">
-                    {isLocked ? (
-                      <div className="flex items-center gap-2 text-xs font-bold text-slate-400 mt-2 uppercase tracking-tighter">
-                        <Lock className="h-3 w-3" /> Finish previous module
-                      </div>
-                    ) : (
-                      <div className="text-xs text-slate-500 font-medium">
-                        {module.quiz.length} Practical Questions • {Math.round(module.passingScore * 100)}% to pass
-                      </div>
-                    )}
+                  <CardContent className="p-8 pt-0 flex-1 space-y-4">
+                    <div className="h-px bg-slate-50 w-full" />
+                    <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <span className="flex items-center gap-1.5"><HelpCircle className="h-3.5 w-3.5" /> {module.quiz.length} Challenges</span>
+                      <span className="flex items-center gap-1.5"><Target className="h-3.5 w-3.5" /> {Math.round(module.passingScore * 100)}% Pass</span>
+                    </div>
                   </CardContent>
-                  <CardFooter className="pt-0">
+                  <CardFooter className="p-8 pt-0">
                     {isCompleted ? (
-                      <Button variant="outline" className="w-full h-11 border-emerald-200 text-emerald-600 hover:bg-emerald-50 font-bold" onClick={() => handleStartModule(module)}>
-                        Review Content
+                      <Button variant="outline" className="w-full h-12 rounded-2xl border-slate-200 font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all" onClick={() => handleStartModule(module)}>
+                        Audit Protocol
                       </Button>
                     ) : isLocked ? (
-                      <Button disabled className="w-full h-11 bg-slate-100 text-slate-400 border-0">
-                        Locked
+                      <Button disabled className="w-full h-12 rounded-2xl bg-slate-50 text-slate-300 border-none font-black text-[10px] uppercase tracking-widest">
+                        Protocol Locked
                       </Button>
                     ) : (
-                      <Button className="w-full h-11 bg-primary hover:bg-primary/90 font-bold shadow-md" onClick={() => handleStartModule(module)}>
-                        {attempts > 0 ? "Retry Certification" : "Begin Certification"}
+                      <Button className="w-full h-12 rounded-2xl bg-slate-900 text-white hover:bg-slate-800 font-black text-[10px] uppercase tracking-[0.2em] shadow-xl transition-all shadow-slate-200" onClick={() => handleStartModule(module)}>
+                        {attempts > 0 ? "Resume Validation" : "Initialize Certification"}
                       </Button>
                     )}
                   </CardFooter>
@@ -326,5 +395,7 @@ export default function TrainingPage() {
         )}
       </div>
     </Layout>
+  );
+}
   );
 }
