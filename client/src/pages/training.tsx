@@ -16,7 +16,9 @@ import {
   AlertCircle,
   XCircle,
   HelpCircle,
-  ShieldCheck
+  ShieldCheck,
+  Target,
+  FileText
 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -395,7 +397,5 @@ export default function TrainingPage() {
         )}
       </div>
     </Layout>
-  );
-}
   );
 }
