@@ -97,21 +97,28 @@ export interface Notification {
 export const TRAINING_MODULES: TrainingModule[] = [
   {
     id: "m1",
-    title: "Intro to Data Entry & Accuracy Auditing",
-    description: "Fundamentals and quality control techniques.",
-    content: `Professional data entry is built on accuracy...`,
+    title: "Enterprise Data Integrity & Accuracy",
+    description: "Core principles of high-precision data processing and verification.",
+    content: `Precision is the cornerstone of Lexington Global Systems. In this module, you will master the 'Scan & Verify' methodology, a rigorous protocol designed to eliminate input variances and ensure 99.9% data fidelity.
+
+Key Learning Objectives:
+• Implementation of the Double-Entry Verification (DEV) cycle.
+• Identification and remediation of character transposition errors.
+• Maintaining data lineage from source material to digital output.
+
+Accuracy isn't just a goal; it's our product. Every row you process contributes to the integrity of global enterprise systems.`,
     quiz: [
       {
-        question: "What is the 'Scan & Verify' method?",
-        options: ["Scanning the file for viruses", "Scanning the source then verifying the entry", "Using a barcode scanner", "Quickly glancing at the headers"],
+        question: "What defines the 'Scan & Verify' methodology in our operations?",
+        options: ["Automated OCR processing with no oversight", "Manual source-to-target alignment with secondary verification", "Using basic spreadsheet filters", "Quickly glancing at row headers"],
         correctAnswer: 1,
-        explanation: "Scan & Verify involves looking at the original source material and confirming the digital entry matches it perfectly."
+        explanation: "The Lexington 'Scan & Verify' protocol requires specialists to align digital entries directly with authenticated source materials before secondary audit."
       },
       {
-        question: "Which of these is a 'transposed number' error?",
-        options: ["Entering 100 instead of 200", "Entering 'John' instead of 'Jon'", "Entering 1234 instead of 1243", "Leaving a field empty"],
+        question: "Which error type represents the highest risk to data utility in bulk sets?",
+        options: ["Minor capitalization variance", "Format inconsistency", "Numeric transposition in financial fields", "Missing optional metadata"],
         correctAnswer: 2,
-        explanation: "Transposition occurs when two digits or characters are swapped accidentally."
+        explanation: "Numeric transposition can lead to significant fiscal discrepancies in enterprise reporting and is a primary focus of our Quality Assurance (QA) audits."
       }
     ],
     passingScore: 1.0,
@@ -179,27 +186,27 @@ export const MOCK_USERS: User[] = [
 export const MOCK_TASKS: Task[] = [
   { 
     id: "t1", 
-    title: "Invoice Batch Processing", 
-    description: "Download the source invoice list and format into CSV with required headers.", 
+    title: "Fiscal Audit: Q1 Invoice Processing", 
+    description: "Verify and normalize high-volume invoice metadata from authenticated PDF sources into structured CSV output for enterprise ledger integration.", 
     payPerRow: 0.25, 
     status: "open", 
-    dataFields: ["Invoice Number", "Date", "Amount"], 
+    dataFields: ["Vendor ID", "Fiscal Date", "Net Amount", "Tax ID"], 
     maxRows: CONFIG.DEFAULT_MAX_ROWS,
     createdAt: "2024-02-10T10:00:00Z",
-    sourceDataUrl: "/data/invoices_source.pdf",
+    sourceDataUrl: "/data/enterprise_audit_q1.pdf",
     clientId: "u4"
   },
   { 
     id: "t2", 
-    title: "Inventory Log Update", 
-    description: "Process the product stock list. Ensure all Warehouse names are valid.", 
+    title: "Inventory Asset Verification Cycle", 
+    description: "Perform secondary validation on global inventory logs. Specialists must cross-reference product identifiers with valid regional warehouse codes.", 
     payPerRow: 0.15, 
     status: "assigned", 
     assignedTo: "u2",
-    dataFields: ["Product ID", "Quantity", "Warehouse"], 
+    dataFields: ["SKU-ID", "Asset Quantity", "Regional Hub"], 
     maxRows: 50,
     createdAt: "2024-02-11T09:30:00Z",
-    sourceDataUrl: "/data/stock_levels_feb.xlsx",
+    sourceDataUrl: "/data/inventory_verification_m2.xlsx",
     validWarehouseNames: ["North-Hub", "East-Terminal", "South-Depot", "Central-Logistics"],
     clientId: "u4"
   }
