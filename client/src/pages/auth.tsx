@@ -15,6 +15,8 @@ import { useToast } from "@/hooks/use-toast";
 import { CheckSquare } from "lucide-react";
 
 const authSchema = z.object({
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
   email: z.string().email("Please enter a valid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
@@ -32,6 +34,8 @@ export default function Auth() {
   const form = useForm<z.infer<typeof authSchema>>({
     resolver: zodResolver(authSchema),
     defaultValues: {
+      firstName: "",
+      lastName: "",
       email: "",
       password: "",
     },
@@ -39,6 +43,7 @@ export default function Auth() {
 
   const onSubmit = async (values: z.infer<typeof authSchema>, isRegister: boolean) => {
     if (isRegister) {
+      const name = `${values.firstName || ''} ${values.lastName || ''}`.trim() || values.email;
       try {
         const response = await fetch("https://e3530145-07c5-48e8-adfd-1ba958a88354-00-1rdomg3mwja33.riker.replit.dev/api/register", {
           method: "POST",
@@ -46,7 +51,7 @@ export default function Auth() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            name: values.email,
+            name,
             email: values.email,
             password: values.password,
             role: "worker"
@@ -162,6 +167,34 @@ export default function Auth() {
               <CardContent>
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit((v) => onSubmit(v, true))} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="firstName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>First Name</FormLabel>
+                            <FormControl>
+                              <Input placeholder="John" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="lastName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Last Name</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Doe" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                     <FormField
                       control={form.control}
                       name="email"
