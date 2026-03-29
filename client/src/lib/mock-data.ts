@@ -222,7 +222,7 @@ interface AppState {
   payouts: Payout[];
   notifications: Notification[];
   
-  login: (email: string, role: "admin" | "worker" | "client") => void;
+  login: (email: string, role: "admin" | "worker" | "client", name?: string) => void;
   logout: () => void;
   
   registerAttempt: (moduleId: string) => void;
@@ -252,10 +252,25 @@ export const useStore = create<AppState>((set, get) => ({
     { id: "n1", userId: "u2", title: "Welcome!", message: `Thanks for joining ${CONFIG.APP_NAME}.`, type: "info", read: false, createdAt: new Date().toISOString() }
   ],
   
-  login: (email, role) => {
-    const user = MOCK_USERS.find(u => u.role === role) || 
-                { id: "new", name: "Demo User", email, role, balance: 0, completedModules: [], moduleAttempts: {} };
-    set({ currentUser: user });
+  login: (email, role, name) => {
+    // Check if user exists in mock data, or create a temporary one for the session
+    const existingUser = MOCK_USERS.find(u => u.email === email);
+    
+    if (existingUser) {
+       set({ currentUser: existingUser });
+    } else {
+       set({ 
+         currentUser: { 
+           id: "session_" + Math.random().toString(36).substr(2, 9), 
+           name: name || "User", 
+           email, 
+           role, 
+           balance: 0, 
+           completedModules: [], 
+           moduleAttempts: {} 
+         } 
+       });
+    }
   },
 
   logout: () => set({ currentUser: null }),

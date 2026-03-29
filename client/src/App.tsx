@@ -1,8 +1,10 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
+import { useEffect } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useStore } from "@/lib/mock-data";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Auth from "@/pages/auth";
@@ -19,6 +21,33 @@ import ClientDashboard from "@/pages/dashboard-client";
 import { TermsPage, PrivacyPage, PayoutPolicyPage } from "@/pages/legal";
 
 function Router() {
+  const [location, setLocation] = useLocation();
+  const { currentUser, login, logout } = useStore();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch("https://e3530145-07c5-48e8-adfd-1ba958a88354-00-1rdomg3mwja33.riker.replit.dev/api/me", {
+          credentials: "include" 
+        });
+        if (response.ok) {
+          const userData = await response.json();
+          // Store actual user data and map it to our UI store structure
+          login(userData.email, userData.role, userData.name);
+        } else {
+          logout();
+          if (location !== "/" && location !== "/auth" && !location.startsWith("/about") && !location.startsWith("/contact") && !location.startsWith("/businesses") && !location.startsWith("/terms") && !location.startsWith("/privacy") && !location.startsWith("/payout-policy")) {
+             setLocation("/auth");
+          }
+        }
+      } catch (error) {
+        console.error("Auth check failed:", error);
+      }
+    };
+    
+    checkAuth();
+  }, [location]);
+
   return (
     <Switch>
       <Route path="/" component={Home} />
