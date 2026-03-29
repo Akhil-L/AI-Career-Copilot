@@ -46,6 +46,7 @@ export default function Auth() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
+            name: values.email,
             email: values.email,
             password: values.password,
             role: "worker"
