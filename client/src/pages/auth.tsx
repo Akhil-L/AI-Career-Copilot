@@ -37,16 +37,51 @@ export default function Auth() {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof authSchema>, isRegister: boolean) => {
-    // Simple mock logic for demo
-    if (values.email.includes("admin")) {
-      login(values.email, "admin");
-      toast({ title: "Welcome back, Admin", description: "You have full access." });
-      setLocation("/admin");
+  const onSubmit = async (values: z.infer<typeof authSchema>, isRegister: boolean) => {
+    if (isRegister) {
+      try {
+        const response = await fetch("https://e3530145-07c5-48e8-adfd-1ba958a88354-00-1rdomg3mwja33.riker.replit.dev/api/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: values.email,
+            password: values.password,
+            role: "worker"
+          }),
+        });
+
+        if (response.ok) {
+          toast({ title: "Registration successful", description: "Your account has been created." });
+          login(values.email, "worker");
+          setLocation("/dashboard");
+        } else {
+          const errorData = await response.json().catch(() => null);
+          toast({ 
+            title: "Registration failed", 
+            description: errorData?.message || "An error occurred during registration.",
+            variant: "destructive"
+          });
+        }
+      } catch (error) {
+        toast({ 
+          title: "Registration failed", 
+          description: "Network error or server is unreachable.",
+          variant: "destructive"
+        });
+      }
     } else {
-      login(values.email, "worker");
-      toast({ title: "Welcome, Worker", description: "Ready to earn?" });
-      setLocation("/dashboard");
+      // Simple mock logic for demo
+      if (values.email.includes("admin")) {
+        login(values.email, "admin");
+        toast({ title: "Welcome back, Admin", description: "You have full access." });
+        setLocation("/admin");
+      } else {
+        login(values.email, "worker");
+        toast({ title: "Welcome, Worker", description: "Ready to earn?" });
+        setLocation("/dashboard");
+      }
     }
   };
 
