@@ -78,7 +78,6 @@ export default function Auth() {
         });
       }
     } else {
-      // Simple mock logic for demo
       if (values.email.includes("admin")) {
         login(values.email, "admin");
         toast({ title: "Welcome back, Admin", description: "You have full access." });
@@ -146,10 +145,6 @@ export default function Auth() {
                       )}
                     />
                     <Button type="submit" className="w-full h-11 text-base">Sign In</Button>
-                    
-                    <div className="text-xs text-center text-muted-foreground mt-4">
-                      For Demo: Use "admin@test.com" for Admin View
-                    </div>
                   </form>
                 </Form>
               </CardContent>
