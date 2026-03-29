@@ -33,7 +33,7 @@ function Router() {
         if (response.ok) {
           const userData = await response.json();
           // Store actual user data and map it to our UI store structure
-          login(userData.email, userData.role, userData.name);
+          login(userData.email, userData.role || "worker", userData.name);
         } else {
           logout();
           if (location !== "/" && location !== "/auth" && !location.startsWith("/about") && !location.startsWith("/contact") && !location.startsWith("/businesses") && !location.startsWith("/terms") && !location.startsWith("/privacy") && !location.startsWith("/payout-policy")) {

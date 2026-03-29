@@ -240,7 +240,7 @@ interface AppState {
 }
 
 export const useStore = create<AppState>((set, get) => ({
-  currentUser: MOCK_USERS[1], 
+  currentUser: null, 
   tasks: MOCK_TASKS,
   submissions: [],
   earnings: [],
@@ -265,9 +265,12 @@ export const useStore = create<AppState>((set, get) => ({
            name: name || "User", 
            email, 
            role, 
-           balance: 0, 
-           completedModules: [], 
-           moduleAttempts: {} 
+           balance: 125.50, 
+           completedModules: ["m1", "m2", "m3", "m4"], 
+           moduleAttempts: { "m1": 1, "m2": 1, "m3": 1, "m4": 1 },
+           accuracyScore: 98,
+           approvedSubmissions: 45,
+           rejectedSubmissions: 1
          } 
        });
     }
