@@ -65,15 +65,20 @@ export default function Auth() {
           setLocation("/dashboard");
         } else {
           const errorData = await response.json().catch(() => null);
+          console.error("Registration API Error:", errorData);
+          
+          const errorMessage = errorData?.error || errorData?.message || "An error occurred during registration.";
+          
           toast({ 
-            title: "Registration failed", 
-            description: errorData?.message || "An error occurred during registration.",
+            title: "Error", 
+            description: errorMessage,
             variant: "destructive"
           });
         }
       } catch (error) {
+        console.error("Registration Network Error:", error);
         toast({ 
-          title: "Registration failed", 
+          title: "Error", 
           description: "Network error or server is unreachable.",
           variant: "destructive"
         });
