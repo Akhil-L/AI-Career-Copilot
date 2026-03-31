@@ -48,6 +48,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
     { label: "Contact", href: "/contact" },
   ];
 
+  const handleLogout = async () => {
+    try {
+      await fetch("https://e3530145-07c5-48e8-adfd-1ba958a88354-00-1rdomg3mwja33.riker.replit.dev/api/logout", {
+        method: "POST",
+        credentials: "include"
+      });
+    } catch (error) {
+      console.error("Logout request failed:", error);
+    }
+    logout();
+    setLocation("/auth");
+  };
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans text-slate-900 selection:bg-blue-100 selection:text-blue-900">
       {/* Premium Navbar */}
@@ -153,7 +166,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                           <User className="h-4 w-4 mr-3" /> View Profile
                         </DropdownMenuItem>
                       )}
-                      <DropdownMenuItem className="text-red-600 font-bold focus:bg-red-50 focus:text-red-600 cursor-pointer p-3 rounded-xl transition-colors" onClick={() => { logout(); setLocation("/"); }}>
+                      <DropdownMenuItem className="text-red-600 font-bold focus:bg-red-50 focus:text-red-600 cursor-pointer p-3 rounded-xl transition-colors" onClick={handleLogout}>
                         <LogOut className="h-4 w-4 mr-3" /> Sign Out
                       </DropdownMenuItem>
                     </DropdownMenuContent>
