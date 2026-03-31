@@ -525,23 +525,23 @@ function AnalyticsCard({ title, value, icon: Icon, color }: { title: string, val
   };
 
   return (
-    <Card className="relative overflow-hidden transition-all duration-500 hover:translate-y-[-4px] hover:shadow-2xl border border-slate-200/60 bg-white group rounded-[2rem] premium-shadow">
-      <CardContent className="p-10">
-        <div className="flex items-center justify-between mb-8">
-          <div className={`p-5 rounded-2xl border ${colors[color]} transition-all duration-300 group-hover:rotate-6 group-hover:scale-110 shadow-sm`}>
+    <Card className="relative overflow-hidden transition-all duration-500 hover:translate-y-[-4px] hover:shadow-2xl border border-slate-200/60 bg-white group rounded-[2rem] premium-shadow h-full flex flex-col">
+      <CardContent className="p-10 flex-1 flex flex-col">
+        <div className="flex items-center justify-between mb-8 gap-4">
+          <div className={`p-5 rounded-2xl border ${colors[color]} transition-all duration-300 group-hover:rotate-6 group-hover:scale-110 shadow-sm shrink-0`}>
             <Icon className="h-7 w-7" />
           </div>
-          <div className="flex flex-col items-end">
+          <div className="flex flex-col items-end shrink-0">
             <Badge variant="outline" className="text-[10px] font-black text-emerald-600 bg-emerald-50 border-emerald-100 px-3 py-1 rounded-full flex items-center gap-1.5 uppercase tracking-widest">
               <TrendingUp className="h-3 w-3" /> +12.5%
             </Badge>
           </div>
         </div>
-        <div className="space-y-1">
-          <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 mb-2">{title}</p>
-          <h3 className="text-4xl font-black text-slate-900 tracking-tighter">{value}</h3>
+        <div className="space-y-1 flex-1 min-w-0">
+          <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 mb-2 truncate">{title}</p>
+          <h3 className="text-4xl font-black text-slate-900 tracking-tighter truncate">{value}</h3>
         </div>
-        <div className="mt-6 pt-6 border-t border-slate-50 flex items-center justify-between">
+        <div className="mt-6 pt-6 border-t border-slate-50 flex items-center justify-between shrink-0">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Live Audit</span>
           <div className="flex gap-1">
             {[1,2,3].map(i => <div key={i} className="h-1 w-3 rounded-full bg-slate-100 group-hover:bg-blue-200 transition-colors" style={{transitionDelay: `${i*100}ms`}} />)}

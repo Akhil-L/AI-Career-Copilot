@@ -96,46 +96,46 @@ export default function WorkerDashboard() {
 
         {/* Metric Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="bg-white border-slate-200/60 shadow-sm premium-shadow hover:translate-y-[-2px] transition-all duration-300">
-            <CardContent className="p-8 flex items-center gap-6">
-              <div className="p-4 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100/50">
+          <Card className="bg-white border-slate-200/60 shadow-sm premium-shadow hover:translate-y-[-2px] transition-all duration-300 flex flex-col h-full rounded-[2rem]">
+            <CardContent className="p-8 flex flex-col sm:flex-row items-start sm:items-center gap-6 flex-1">
+              <div className="p-4 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100/50 shrink-0">
                 <DollarSign className="h-7 w-7" />
               </div>
-              <div>
-                <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Total Balance</p>
-                <div className="flex items-baseline gap-1">
-                  <h3 className="text-3xl font-black text-slate-900">${currentUser.balance.toFixed(2)}</h3>
-                  <span className="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded">+12%</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1 truncate">Total Balance</p>
+                <div className="flex items-baseline gap-2 flex-wrap">
+                  <h3 className="text-3xl font-black text-slate-900 truncate">${currentUser.balance.toFixed(2)}</h3>
+                  <span className="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded shrink-0">+12%</span>
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="bg-white border-slate-200/60 shadow-sm premium-shadow hover:translate-y-[-2px] transition-all duration-300">
-            <CardContent className="p-8 flex items-center gap-6">
-              <div className="p-4 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100/50">
+          <Card className="bg-white border-slate-200/60 shadow-sm premium-shadow hover:translate-y-[-2px] transition-all duration-300 flex flex-col h-full rounded-[2rem]">
+            <CardContent className="p-8 flex flex-col sm:flex-row items-start sm:items-center gap-6 flex-1">
+              <div className="p-4 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100/50 shrink-0">
                 <CheckCircle2 className="h-7 w-7" />
               </div>
-              <div>
-                <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Tasks Completed</p>
-                <div className="flex items-baseline gap-1">
-                  <h3 className="text-3xl font-black text-slate-900">{completedTasks.length}</h3>
-                  <span className="text-[10px] font-bold text-slate-400 italic ml-1">Total</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1 truncate">Tasks Completed</p>
+                <div className="flex items-baseline gap-2 flex-wrap">
+                  <h3 className="text-3xl font-black text-slate-900 truncate">{completedTasks.length}</h3>
+                  <span className="text-[10px] font-bold text-slate-400 italic shrink-0">Total</span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white border-slate-200/60 shadow-sm premium-shadow hover:translate-y-[-2px] transition-all duration-300">
-            <CardContent className="p-8 flex items-center gap-6">
-              <div className="p-4 rounded-2xl bg-purple-50 text-purple-600 border border-purple-100/50">
+          <Card className="bg-white border-slate-200/60 shadow-sm premium-shadow hover:translate-y-[-2px] transition-all duration-300 flex flex-col h-full rounded-[2rem]">
+            <CardContent className="p-8 flex flex-col sm:flex-row items-start sm:items-center gap-6 flex-1">
+              <div className="p-4 rounded-2xl bg-purple-50 text-purple-600 border border-purple-100/50 shrink-0">
                 <Award className="h-7 w-7" />
               </div>
-              <div>
-                <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Quality Rating</p>
-                <div className="flex items-baseline gap-1">
-                  <h3 className="text-3xl font-black text-slate-900">{currentUser.accuracyScore || 0}%</h3>
-                  <div className="flex gap-0.5 ml-2">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1 truncate">Quality Rating</p>
+                <div className="flex items-baseline gap-2 flex-wrap">
+                  <h3 className="text-3xl font-black text-slate-900 truncate">{currentUser.accuracyScore || 0}%</h3>
+                  <div className="flex gap-0.5 shrink-0">
                     {[1,2,3,4,5].map(i => <Star key={i} className={`h-3 w-3 ${i <= 4 ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`} />)}
                   </div>
                 </div>
