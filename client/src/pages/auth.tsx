@@ -45,24 +45,46 @@ export default function Auth() {
     if (isRegister) {
       const name = `${values.firstName || ''} ${values.lastName || ''}`.trim() || values.email;
       try {
+        const payload = {
+          name,
+          email: values.email,
+          password: values.password,
+          role: "worker"
+        };
+        console.log("Registration Payload:", payload);
+        
         const response = await fetch("https://e3530145-07c5-48e8-adfd-1ba958a88354-00-1rdomg3mwja33.riker.replit.dev/api/register", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           credentials: "include",
-          body: JSON.stringify({
-            name,
-            email: values.email,
-            password: values.password,
-            role: "worker"
-          }),
+          body: JSON.stringify(payload),
         });
 
         if (response.ok) {
-          toast({ title: "Registration successful", description: "Your account has been created." });
-          login(values.email, "worker");
-          setLocation("/dashboard");
+          toast({ title: "Registration successful", description: "Logging you in..." });
+          
+          // Automatically log the user in to establish the session cookie
+          const loginPayload = { email: values.email, password: values.password };
+          console.log("Auto-Login Payload:", loginPayload);
+          
+          const loginResponse = await fetch("https://e3530145-07c5-48e8-adfd-1ba958a88354-00-1rdomg3mwja33.riker.replit.dev/api/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify(loginPayload)
+          });
+          
+          if (loginResponse.ok) {
+            const userData = await loginResponse.json();
+            login(userData.email, "worker", userData.name);
+            setLocation("/dashboard");
+          } else {
+            // Fallback if auto-login fails
+            login(values.email, "worker", name);
+            setLocation("/dashboard");
+          }
         } else {
           const errorData = await response.json().catch(() => null);
           console.error("Registration API Error:", errorData);
@@ -85,20 +107,27 @@ export default function Auth() {
       }
     } else {
       try {
+        const payload = {
+          email: values.email,
+          password: values.password
+        };
+        console.log("Login Payload:", payload);
+
         const response = await fetch("https://e3530145-07c5-48e8-adfd-1ba958a88354-00-1rdomg3mwja33.riker.replit.dev/api/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           credentials: "include",
-          body: JSON.stringify({
-            username: values.email,
-            password: values.password
-          }),
+          body: JSON.stringify(payload),
         });
+
+        console.log("Login Response Status:", response.status);
 
         if (response.ok) {
           const userData = await response.json();
+          console.log("Login Response Data:", userData);
+          
           login(userData.email, userData.role || "worker", userData.name);
           
           if (userData.role === "admin") {
@@ -110,13 +139,15 @@ export default function Auth() {
           }
         } else {
           const errorData = await response.json().catch(() => null);
+          console.error("Login API Error:", errorData);
           toast({ 
             title: "Login failed", 
-            description: errorData?.message || "Invalid credentials.",
+            description: errorData?.error || errorData?.message || "Invalid credentials.",
             variant: "destructive"
           });
         }
       } catch (error) {
+        console.error("Login Network Error:", error);
         toast({ 
           title: "Login failed", 
           description: "Network error or server is unreachable.",

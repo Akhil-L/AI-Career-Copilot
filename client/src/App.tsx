@@ -28,7 +28,11 @@ function Router() {
     const checkAuth = async () => {
       try {
         const response = await fetch("https://e3530145-07c5-48e8-adfd-1ba958a88354-00-1rdomg3mwja33.riker.replit.dev/api/me", {
-          credentials: "include" 
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json"
+          }
         });
         if (response.ok) {
           const userData = await response.json();
