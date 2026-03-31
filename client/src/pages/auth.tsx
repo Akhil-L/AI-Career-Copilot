@@ -50,6 +50,7 @@ export default function Auth() {
           headers: {
             "Content-Type": "application/json",
           },
+          credentials: "include",
           body: JSON.stringify({
             name,
             email: values.email,
@@ -78,14 +79,44 @@ export default function Auth() {
         });
       }
     } else {
-      if (values.email.includes("admin")) {
-        login(values.email, "admin");
-        toast({ title: "Welcome back, Admin", description: "You have full access." });
-        setLocation("/admin");
-      } else {
-        login(values.email, "worker");
-        toast({ title: "Welcome, Worker", description: "Ready to earn?" });
-        setLocation("/dashboard");
+      try {
+        const response = await fetch("https://e3530145-07c5-48e8-adfd-1ba958a88354-00-1rdomg3mwja33.riker.replit.dev/api/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            username: values.email,
+            password: values.password
+          }),
+        });
+
+        if (response.ok) {
+          const userData = await response.json();
+          login(userData.email, userData.role || "worker", userData.name);
+          
+          if (userData.role === "admin") {
+            toast({ title: "Welcome back, Admin", description: "You have full access." });
+            setLocation("/admin");
+          } else {
+            toast({ title: "Welcome back", description: "Ready to earn?" });
+            setLocation("/dashboard");
+          }
+        } else {
+          const errorData = await response.json().catch(() => null);
+          toast({ 
+            title: "Login failed", 
+            description: errorData?.message || "Invalid credentials.",
+            variant: "destructive"
+          });
+        }
+      } catch (error) {
+        toast({ 
+          title: "Login failed", 
+          description: "Network error or server is unreachable.",
+          variant: "destructive"
+        });
       }
     }
   };
