@@ -44,7 +44,7 @@ export default function Home() {
               </Button>
             </Link>
             <Link href="/auth?tab=register">
-              <Button size="lg" variant="outline" className="h-16 px-12 text-sm border-slate-700 hover:bg-white/10 text-white font-black uppercase tracking-[0.2em] rounded-2xl backdrop-blur-md transition-all">
+              <Button size="lg" variant="ghost" className="border border-slate-700 hover:bg-white/10 text-white hover:text-white font-black uppercase tracking-[0.2em] rounded-2xl backdrop-blur-md transition-all h-16 px-12 text-sm">
                 Apply as Specialist
               </Button>
             </Link>
@@ -164,7 +164,7 @@ export default function Home() {
       <section className="bg-slate-900 rounded-[3rem] p-16 md:p-24 text-center text-white relative overflow-hidden mb-12 shadow-2xl">
         <div className="relative z-10 max-w-4xl mx-auto space-y-8">
           <Badge className="bg-blue-600/20 text-blue-400 border border-blue-500/30 font-black text-[10px] uppercase tracking-[0.25em] px-4 py-1.5 rounded-full">Apply for Certification</Badge>
-          <h2 className="text-5xl md:text-7xl font-black tracking-tight leading-tight">Ready to Scale Your Professional Impact?</h2>
+          <h2 className="text-5xl md:text-7xl font-black tracking-tight leading-tight text-white">Ready to Scale Your Professional Impact?</h2>
           <p className="text-slate-400 mb-10 text-xl md:text-2xl font-medium leading-relaxed max-w-3xl mx-auto">
             Lexington Global is currently vetting certified data specialists for new enterprise contracts. Establish your professional profile today.
           </p>
