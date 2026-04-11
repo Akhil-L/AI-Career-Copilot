@@ -55,7 +55,22 @@ export default function WorkerDashboard() {
   const myTasks = tasks.filter(t => t.assignedTo === currentUser.id && t.status !== "approved" && t.status !== "rejected");
   const availableTasks = tasks.filter(t => t.status === "open" && t.sourceDataUrl); // Rule: Only show tasks with source data
   const completedTasks = tasks.filter(t => t.assignedTo === currentUser.id && t.status === "approved");
-  const rank = getWorkerRank(currentUser);
+  const rejectedTasksCount = currentUser.rejectedSubmissions || 0;
+  const approvedTasksCount = completedTasks.length;
+  const totalSubmissions = approvedTasksCount + rejectedTasksCount;
+  
+  // Calculate dynamic accuracy score
+  const accuracyScore = totalSubmissions > 0 
+    ? Math.round((approvedTasksCount / totalSubmissions) * 100) 
+    : 0;
+    
+  // Dynamic rank based on real stats
+  const dynamicRankUser = { 
+    ...currentUser, 
+    accuracyScore, 
+    approvedSubmissions: approvedTasksCount 
+  };
+  const rank = getWorkerRank(dynamicRankUser);
 
   return (
     <Layout>
@@ -134,9 +149,12 @@ export default function WorkerDashboard() {
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1 truncate">Quality Rating</p>
                 <div className="flex items-baseline gap-2 flex-wrap">
-                  <h3 className="text-3xl font-black text-slate-900 truncate">{currentUser.accuracyScore || 0}%</h3>
+                  <h3 className="text-3xl font-black text-slate-900 truncate">{accuracyScore}%</h3>
                   <div className="flex gap-0.5 shrink-0">
-                    {[1,2,3,4,5].map(i => <Star key={i} className={`h-3 w-3 ${i <= 4 ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`} />)}
+                    {[1,2,3,4,5].map(i => {
+                      const isActive = i <= Math.round(accuracyScore / 20);
+                      return <Star key={i} className={`h-3 w-3 ${isActive ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`} />;
+                    })}
                   </div>
                 </div>
               </div>

@@ -259,18 +259,19 @@ export const useStore = create<AppState>((set, get) => ({
     if (existingUser) {
        set({ currentUser: existingUser });
     } else {
+       // Initialize dynamic stats as 0 for new sessions
        set({ 
          currentUser: { 
            id: "session_" + Math.random().toString(36).substr(2, 9), 
            name: name || "User", 
            email, 
            role, 
-           balance: 125.50, 
+           balance: 0, 
            completedModules: ["m1", "m2", "m3", "m4"], 
            moduleAttempts: { "m1": 1, "m2": 1, "m3": 1, "m4": 1 },
-           accuracyScore: 98,
-           approvedSubmissions: 45,
-           rejectedSubmissions: 1
+           accuracyScore: 0,
+           approvedSubmissions: 0,
+           rejectedSubmissions: 0
          } 
        });
     }
