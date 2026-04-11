@@ -309,131 +309,246 @@ export const useStore = create<AppState>((set, get) => ({
   addTask: async (taskData) => {
     const { currentUser } = get();
     if (currentUser?.role !== 'admin') return;
-    set((state) => ({
-      tasks: [...state.tasks, { 
-        ...taskData, 
-        id: Math.random().toString(36).substr(2, 9), 
-        status: "open", 
-        createdAt: new Date().toISOString() 
-      }]
-    }));
+    
+    try {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/api/tasks`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'omit', // Since we don't have real auth yet, omit credentials for now
+        body: JSON.stringify(taskData)
+      });
+      
+      if (response.ok) {
+        const newTask = await response.json();
+        set((state) => ({
+          tasks: [...state.tasks, newTask]
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to add task:", error);
+    }
   },
 
-  clientSubmitTask: (taskData) => {
+  clientSubmitTask: async (taskData) => {
     const { currentUser } = get();
     if (currentUser?.role !== 'client') return;
-    set((state) => ({
-      tasks: [...state.tasks, { 
-        ...taskData, 
-        id: Math.random().toString(36).substr(2, 9), 
-        status: "pending_review", 
-        clientId: currentUser.id,
-        createdAt: new Date().toISOString() 
-      }]
-    }));
+    
+    try {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/api/tasks`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'omit',
+        body: JSON.stringify({ ...taskData, clientId: currentUser.id, status: 'pending_review' })
+      });
+      
+      if (response.ok) {
+        const newTask = await response.json();
+        set((state) => ({
+          tasks: [...state.tasks, newTask]
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to submit client task:", error);
+    }
   },
 
   approveTask: async (taskId) => {
     const { currentUser } = get();
     if (currentUser?.role !== 'admin') return;
-    set((state) => ({
-      tasks: state.tasks.map(t => t.id === taskId ? { ...t, status: "open" } : t)
-    }));
+    
+    try {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/api/tasks/${taskId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'omit',
+        body: JSON.stringify({ status: 'open' })
+      });
+      
+      if (response.ok) {
+        set((state) => ({
+          tasks: state.tasks.map(t => t.id === taskId ? { ...t, status: "open" } : t)
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to approve task:", error);
+    }
   },
 
   assignTask: async (taskId, workerId) => {
     const { currentUser } = get();
     if (currentUser?.role !== 'admin' && currentUser?.id !== workerId) return;
-    set((state) => ({
-      tasks: state.tasks.map(t => t.id === taskId ? { ...t, status: "assigned", assignedTo: workerId } : t)
-    }));
-  },
-
-  submitTask: async (taskId, fileName, data) => set((state) => {
-    const task = state.tasks.find(t => t.id === taskId);
-    if (!task || !state.currentUser || task.assignedTo !== state.currentUser.id) return state;
-    if (task.status === 'submitted' || task.status === 'approved') return state;
-
-    const newSubmission: Submission = {
-      id: Math.random().toString(36).substr(2, 9),
-      taskId,
-      workerId: state.currentUser.id,
-      submittedAt: new Date().toISOString(),
-      fileName,
-      rowCount: data.length,
-      previewData: data.slice(0, 10),
-      status: "pending"
-    };
-
-    return {
-      submissions: [...state.submissions, newSubmission],
-      tasks: state.tasks.map(t => t.id === taskId ? { ...t, status: "submitted" } : t)
-    };
-  }),
-
-  reviewSubmission: async (submissionId, status, reason) => set((state) => {
-    if (state.currentUser?.role !== 'admin') return state;
     
-    const submission = state.submissions.find(s => s.id === submissionId);
-    if (!submission) return state;
-
-    const task = state.tasks.find(t => t.id === submission.taskId);
-    if (!task) return state;
-
-    let newEarnings = [...state.earnings];
-    let newPayouts = [...state.payouts];
-    let newBalance = state.currentUser?.id === submission.workerId ? state.currentUser.balance : 0;
-    
-    const earningAmount = status === "approved" ? submission.rowCount * task.payPerRow : 0;
-
-    if (status === "approved") {
-      const earningId = Math.random().toString(36).substr(2, 9);
-      const earning: Earning = {
-        id: earningId,
-        submissionId: submission.id,
-        workerId: submission.workerId,
-        amount: earningAmount,
-        createdAt: new Date().toISOString()
-      };
-      newEarnings.push(earning);
-
-      const payoutId = Math.random().toString(36).substr(2, 9);
-      newPayouts.push({
-        id: payoutId,
-        workerId: submission.workerId,
-        earningIds: [earningId],
-        amount: earningAmount,
-        status: "pending",
-        createdAt: new Date().toISOString()
+    try {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/api/tasks/${taskId}/assign`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'omit',
+        body: JSON.stringify({ workerId })
       });
       
-      if (state.currentUser?.id === submission.workerId) {
-        newBalance = state.currentUser.balance + earningAmount;
+      if (response.ok) {
+        set((state) => ({
+          tasks: state.tasks.map(t => t.id === taskId ? { ...t, status: "assigned", assignedTo: workerId } : t)
+        }));
       }
+    } catch (error) {
+      console.error("Failed to assign task:", error);
     }
-    
-    const notification: Notification = {
-      id: Math.random().toString(36).substr(2, 9),
-      userId: submission.workerId,
-      title: status === "approved" ? "Task Approved!" : "Task Rejected",
-      message: status === "approved" 
-        ? `Your submission for "${task.title}" was approved. $${earningAmount.toFixed(2)} added to pending payouts.`
-        : `Your submission for "${task.title}" was rejected. Reason: ${reason || "No reason provided."}`,
-      type: status === "approved" ? "success" : "warning",
-      relatedId: submission.id,
-      read: false,
-      createdAt: new Date().toISOString()
-    };
+  },
 
-    return {
-      earnings: newEarnings,
-      payouts: newPayouts,
-      notifications: [...state.notifications, notification],
-      submissions: state.submissions.map(s => s.id === submissionId ? { ...s, status, rejectionReason: reason } : s),
-      tasks: state.tasks.map(t => t.id === submission.taskId ? { ...t, status: status === "approved" ? "approved" : "rejected" } : t),
-      currentUser: state.currentUser?.id === submission.workerId ? { ...state.currentUser, balance: newBalance } : state.currentUser
-    };
-  }),
+  submitTask: async (taskId, fileName, data) => {
+    const state = get();
+    const task = state.tasks.find(t => t.id === taskId);
+    if (!task || !state.currentUser || task.assignedTo !== state.currentUser.id) return;
+    if (task.status === 'submitted' || task.status === 'approved') return;
+
+    try {
+      // Mock API call to submit task data
+      // In a real app, this would be a multipart/form-data upload
+      const response = await fetch(`${CONFIG.API_BASE_URL}/api/tasks/${taskId}/submit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'omit',
+        body: JSON.stringify({ fileName, rowCount: data.length, previewData: data.slice(0, 10) })
+      });
+      
+      if (response.ok) {
+        const newSubmission = await response.json();
+        set((state) => ({
+          submissions: [...state.submissions, newSubmission],
+          tasks: state.tasks.map(t => t.id === taskId ? { ...t, status: "submitted" } : t)
+        }));
+      } else {
+        // Fallback for mockup if API fails
+        const newSubmission: Submission = {
+          id: Math.random().toString(36).substr(2, 9),
+          taskId,
+          workerId: state.currentUser.id,
+          submittedAt: new Date().toISOString(),
+          fileName,
+          rowCount: data.length,
+          previewData: data.slice(0, 10),
+          status: "pending"
+        };
+
+        set((state) => ({
+          submissions: [...state.submissions, newSubmission],
+          tasks: state.tasks.map(t => t.id === taskId ? { ...t, status: "submitted" } : t)
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to submit task:", error);
+      
+      // Fallback for mockup if API fails
+      const newSubmission: Submission = {
+        id: Math.random().toString(36).substr(2, 9),
+        taskId,
+        workerId: state.currentUser!.id,
+        submittedAt: new Date().toISOString(),
+        fileName,
+        rowCount: data.length,
+        previewData: data.slice(0, 10),
+        status: "pending"
+      };
+
+      set((state) => ({
+        submissions: [...state.submissions, newSubmission],
+        tasks: state.tasks.map(t => t.id === taskId ? { ...t, status: "submitted" } : t)
+      }));
+    }
+  },
+
+  reviewSubmission: async (submissionId, status, reason) => {
+    const state = get();
+    if (state.currentUser?.role !== 'admin') return;
+    
+    const submission = state.submissions.find(s => s.id === submissionId);
+    if (!submission) return;
+
+    const task = state.tasks.find(t => t.id === submission.taskId);
+    if (!task) return;
+    
+    try {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/api/submissions/${submissionId}/review`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'omit',
+        body: JSON.stringify({ status, reason })
+      });
+      
+      if (response.ok) {
+        // Process the local state updates since we need to update earnings, payouts, etc.
+        let newEarnings = [...state.earnings];
+        let newPayouts = [...state.payouts];
+        let newBalance = state.currentUser?.id === submission.workerId ? state.currentUser.balance : 0;
+        
+        const earningAmount = status === "approved" ? submission.rowCount * task.payPerRow : 0;
+
+        if (status === "approved") {
+          const earningId = Math.random().toString(36).substr(2, 9);
+          const earning: Earning = {
+            id: earningId,
+            submissionId: submission.id,
+            workerId: submission.workerId,
+            amount: earningAmount,
+            createdAt: new Date().toISOString()
+          };
+          newEarnings.push(earning);
+
+          const payoutId = Math.random().toString(36).substr(2, 9);
+          newPayouts.push({
+            id: payoutId,
+            workerId: submission.workerId,
+            earningIds: [earningId],
+            amount: earningAmount,
+            status: "pending",
+            createdAt: new Date().toISOString()
+          });
+          
+          if (state.currentUser?.id === submission.workerId) {
+            newBalance = state.currentUser.balance + earningAmount;
+          }
+        }
+        
+        const notification: Notification = {
+          id: Math.random().toString(36).substr(2, 9),
+          userId: submission.workerId,
+          title: status === "approved" ? "Task Approved!" : "Task Rejected",
+          message: status === "approved" 
+            ? `Your submission for "${task.title}" was approved. $${earningAmount.toFixed(2)} added to pending payouts.`
+            : `Your submission for "${task.title}" was rejected. Reason: ${reason || "No reason provided."}`,
+          type: status === "approved" ? "success" : "warning",
+          relatedId: submission.id,
+          read: false,
+          createdAt: new Date().toISOString()
+        };
+
+        set((state) => ({
+          earnings: newEarnings,
+          payouts: newPayouts,
+          notifications: [...state.notifications, notification],
+          submissions: state.submissions.map(s => s.id === submissionId ? { ...s, status, rejectionReason: reason } : s),
+          tasks: state.tasks.map(t => t.id === submission.taskId ? { ...t, status: status === "approved" ? "approved" : "rejected" } : t),
+          currentUser: state.currentUser?.id === submission.workerId ? { ...state.currentUser, balance: newBalance } : state.currentUser
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to review submission:", error);
+      // We could add fallback logic here similar to submitTask if needed
+    }
+  },
 
   markAsPaid: (payoutId) => set((state) => {
     if (state.currentUser?.role !== 'admin') return state;
@@ -476,20 +591,40 @@ export const useStore = create<AppState>((set, get) => ({
   })),
 
   fetchTasks: async () => {
-    // Mock API fetch
-    const response = await fetch('/api/tasks');
-    if (response.ok) {
-      const data = await response.json();
-      set({ tasks: data });
+    try {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/api/tasks`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'omit' // Omit for mockup, would be 'include' with real auth
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        set({ tasks: data });
+      }
+    } catch (error) {
+      console.error("Failed to fetch tasks:", error);
     }
   },
 
   fetchSubmissions: async () => {
-    // Mock API fetch
-    const response = await fetch('/api/submissions');
-    if (response.ok) {
-      const data = await response.json();
-      set({ submissions: data });
+    try {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/api/submissions`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'omit'
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        set({ submissions: data });
+      }
+    } catch (error) {
+      console.error("Failed to fetch submissions:", error);
     }
   }
 }));

@@ -22,7 +22,7 @@ import { TermsPage, PrivacyPage, PayoutPolicyPage } from "@/pages/legal";
 
 function Router() {
   const [location, setLocation] = useLocation();
-  const { currentUser, login, logout } = useStore();
+  const { currentUser, login, logout, fetchTasks, fetchSubmissions } = useStore();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -38,6 +38,12 @@ function Router() {
           const userData = await response.json();
           // Store actual user data and map it to our UI store structure
           login(userData.email, userData.role || "worker", userData.name);
+          
+          // Fetch initial data after successful login
+          await Promise.all([
+            fetchTasks(),
+            fetchSubmissions()
+          ]);
           
           // Route protection based on role
           const role = userData.role || "worker";
