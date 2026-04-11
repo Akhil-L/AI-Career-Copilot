@@ -228,29 +228,35 @@ interface AppState {
   registerAttempt: (moduleId: string) => void;
   completeModule: (moduleId: string) => void;
   
-  addTask: (task: Omit<Task, "id" | "createdAt" | "status">) => void;
+  addTask: (task: Omit<Task, "id" | "createdAt" | "status">) => Promise<void>;
   clientSubmitTask: (task: Omit<Task, "id" | "createdAt" | "status">) => void;
-  approveTask: (taskId: string) => void;
-  assignTask: (taskId: string, workerId: string) => void;
-  submitTask: (taskId: string, fileName: string, data: any[]) => void;
-  reviewSubmission: (submissionId: string, status: "approved" | "rejected", reason?: string) => void;
+  approveTask: (taskId: string) => Promise<void>;
+  assignTask: (taskId: string, workerId?: string) => Promise<void>;
+  submitTask: (taskId: string, fileName: string, data: any[]) => Promise<void>;
+  reviewSubmission: (submissionId: string, status: "approved" | "rejected", reason?: string) => Promise<void>;
   markAsPaid: (payoutId: string) => void;
   markNotificationRead: (id: string) => void;
-  addNotification: (userId: string, title: string, message: string, type: Notification["type"], relatedId?: string) => void;
+  // The initial tasks fetch logic needs to be moved to the component level 
+  // since Zustand store actions shouldn't typically manage their own async lifecycle
+  // outside of explicit action calls. We'll add a setTasks action.
+  setTasks: (tasks: Task[]) => void;
+  setSubmissions: (submissions: Submission[]) => void;
+  fetchTasks: () => Promise<void>;
+  fetchSubmissions: () => Promise<void>;
 }
 
 export const useStore = create<AppState>((set, get) => ({
   currentUser: null, 
-  tasks: MOCK_TASKS,
+  tasks: [],
   submissions: [],
   earnings: [],
-  payouts: [
-    { id: "p1", workerId: "u2", earningIds: [], amount: 50.00, status: "paid", createdAt: "2024-02-01T10:00:00Z", paidAt: "2024-02-02T14:00:00Z" },
-    { id: "p2", workerId: "u2", earningIds: [], amount: 75.50, status: "pending", createdAt: "2024-02-14T09:00:00Z" }
-  ],
+  payouts: [],
   notifications: [
     { id: "n1", userId: "u2", title: "Welcome!", message: `Thanks for joining ${CONFIG.APP_NAME}.`, type: "info", read: false, createdAt: new Date().toISOString() }
   ],
+  
+  setTasks: (tasks) => set({ tasks }),
+  setSubmissions: (submissions) => set({ submissions }),
   
   login: (email, role, name) => {
     // Check if user exists in mock data, or create a temporary one for the session
@@ -300,7 +306,7 @@ export const useStore = create<AppState>((set, get) => ({
     };
   }),
 
-  addTask: (taskData) => {
+  addTask: async (taskData) => {
     const { currentUser } = get();
     if (currentUser?.role !== 'admin') return;
     set((state) => ({
@@ -327,7 +333,7 @@ export const useStore = create<AppState>((set, get) => ({
     }));
   },
 
-  approveTask: (taskId) => {
+  approveTask: async (taskId) => {
     const { currentUser } = get();
     if (currentUser?.role !== 'admin') return;
     set((state) => ({
@@ -335,7 +341,7 @@ export const useStore = create<AppState>((set, get) => ({
     }));
   },
 
-  assignTask: (taskId, workerId) => {
+  assignTask: async (taskId, workerId) => {
     const { currentUser } = get();
     if (currentUser?.role !== 'admin' && currentUser?.id !== workerId) return;
     set((state) => ({
@@ -343,7 +349,7 @@ export const useStore = create<AppState>((set, get) => ({
     }));
   },
 
-  submitTask: (taskId, fileName, data) => set((state) => {
+  submitTask: async (taskId, fileName, data) => set((state) => {
     const task = state.tasks.find(t => t.id === taskId);
     if (!task || !state.currentUser || task.assignedTo !== state.currentUser.id) return state;
     if (task.status === 'submitted' || task.status === 'approved') return state;
@@ -365,7 +371,7 @@ export const useStore = create<AppState>((set, get) => ({
     };
   }),
 
-  reviewSubmission: (submissionId, status, reason) => set((state) => {
+  reviewSubmission: async (submissionId, status, reason) => set((state) => {
     if (state.currentUser?.role !== 'admin') return state;
     
     const submission = state.submissions.find(s => s.id === submissionId);
@@ -456,7 +462,7 @@ export const useStore = create<AppState>((set, get) => ({
     notifications: state.notifications.map(n => n.id === id ? { ...n, read: true } : n)
   })),
 
-  addNotification: (userId, title, message, type, relatedId) => set((state) => ({
+  addNotification: (userId: string, title: string, message: string, type: "info" | "success" | "warning", relatedId?: string) => set((state) => ({
     notifications: [...state.notifications, {
       id: Math.random().toString(36).substr(2, 9),
       userId,
@@ -467,5 +473,23 @@ export const useStore = create<AppState>((set, get) => ({
       read: false,
       createdAt: new Date().toISOString()
     }]
-  }))
+  })),
+
+  fetchTasks: async () => {
+    // Mock API fetch
+    const response = await fetch('/api/tasks');
+    if (response.ok) {
+      const data = await response.json();
+      set({ tasks: data });
+    }
+  },
+
+  fetchSubmissions: async () => {
+    // Mock API fetch
+    const response = await fetch('/api/submissions');
+    if (response.ok) {
+      const data = await response.json();
+      set({ submissions: data });
+    }
+  }
 }));

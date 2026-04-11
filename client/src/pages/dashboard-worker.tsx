@@ -209,7 +209,7 @@ export default function WorkerDashboard() {
                           padding: '12px 16px' 
                         }}
                         itemStyle={{ fontWeight: 800, fontSize: '14px', color: '#1e293b' }}
-                        labelStyle={{ fontWeight: 800, fontSize: '10px', textTransform: 'uppercase', tracking: '0.1em', color: '#94a3b8', marginBottom: '4px' }}
+                        labelStyle={{ fontWeight: 800, fontSize: '10px', textTransform: 'uppercase', color: '#94a3b8', marginBottom: '4px' }}
                         formatter={(value: number) => [`$${value.toFixed(2)}`, 'Revenue']}
                       />
                       <Area type="monotone" dataKey="earnings" stroke="#2563eb" strokeWidth={4} fillOpacity={1} fill="url(#colorEarnings)" animationDuration={1500} />
