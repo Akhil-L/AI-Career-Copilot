@@ -7,7 +7,7 @@
 
 export const CONFIG = {
   // API & Networking
-  API_BASE_URL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000",
+  API_BASE_URL: import.meta.env.VITE_API_BASE_URL || "https://workflow-backend-mdfx.onrender.com",
   
   // File Submission Limits
   MAX_FILE_SIZE_MB: Number(import.meta.env.VITE_MAX_FILE_SIZE_MB) || 5,

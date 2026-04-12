@@ -53,7 +53,7 @@ export default function Auth() {
         };
         console.log("Registration Payload:", payload);
         
-        const response = await fetch("https://e3530145-07c5-48e8-adfd-1ba958a88354-00-1rdomg3mwja33.riker.replit.dev/api/register", {
+        const response = await fetch("https://workflow-backend-mdfx.onrender.com/api/register", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -69,7 +69,7 @@ export default function Auth() {
           const loginPayload = { email: values.email, password: values.password };
           console.log("Auto-Login Payload:", loginPayload);
           
-          const loginResponse = await fetch("https://e3530145-07c5-48e8-adfd-1ba958a88354-00-1rdomg3mwja33.riker.replit.dev/api/login", {
+          const loginResponse = await fetch("https://workflow-backend-mdfx.onrender.com/api/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -113,7 +113,7 @@ export default function Auth() {
         };
         console.log("Login Payload:", payload);
 
-        const response = await fetch("https://e3530145-07c5-48e8-adfd-1ba958a88354-00-1rdomg3mwja33.riker.replit.dev/api/login", {
+        const response = await fetch("https://workflow-backend-mdfx.onrender.com/api/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

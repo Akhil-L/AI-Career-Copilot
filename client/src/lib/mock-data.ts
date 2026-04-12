@@ -316,7 +316,7 @@ export const useStore = create<AppState>((set, get) => ({
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'omit', // Since we don't have real auth yet, omit credentials for now
+        credentials: 'include',
         body: JSON.stringify(taskData)
       });
       
@@ -341,7 +341,7 @@ export const useStore = create<AppState>((set, get) => ({
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'omit',
+        credentials: 'include',
         body: JSON.stringify({ ...taskData, clientId: currentUser.id, status: 'pending_review' })
       });
       
@@ -366,7 +366,7 @@ export const useStore = create<AppState>((set, get) => ({
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'omit',
+        credentials: 'include',
         body: JSON.stringify({ status: 'open' })
       });
       
@@ -390,7 +390,7 @@ export const useStore = create<AppState>((set, get) => ({
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'omit',
+        credentials: 'include',
         body: JSON.stringify({ workerId })
       });
       
@@ -411,14 +411,12 @@ export const useStore = create<AppState>((set, get) => ({
     if (task.status === 'submitted' || task.status === 'approved') return;
 
     try {
-      // Mock API call to submit task data
-      // In a real app, this would be a multipart/form-data upload
       const response = await fetch(`${CONFIG.API_BASE_URL}/api/tasks/${taskId}/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'omit',
+        credentials: 'include',
         body: JSON.stringify({ fileName, rowCount: data.length, previewData: data.slice(0, 10) })
       });
       
@@ -484,7 +482,7 @@ export const useStore = create<AppState>((set, get) => ({
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'omit',
+        credentials: 'include',
         body: JSON.stringify({ status, reason })
       });
       
@@ -546,7 +544,6 @@ export const useStore = create<AppState>((set, get) => ({
       }
     } catch (error) {
       console.error("Failed to review submission:", error);
-      // We could add fallback logic here similar to submitTask if needed
     }
   },
 
@@ -597,7 +594,7 @@ export const useStore = create<AppState>((set, get) => ({
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'omit' // Omit for mockup, would be 'include' with real auth
+        credentials: 'include'
       });
       
       if (response.ok) {
@@ -616,7 +613,7 @@ export const useStore = create<AppState>((set, get) => ({
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'omit'
+        credentials: 'include'
       });
       
       if (response.ok) {

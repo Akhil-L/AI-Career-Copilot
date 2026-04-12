@@ -50,7 +50,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   const handleLogout = async () => {
     try {
-      await fetch("https://e3530145-07c5-48e8-adfd-1ba958a88354-00-1rdomg3mwja33.riker.replit.dev/api/logout", {
+      await fetch("https://workflow-backend-mdfx.onrender.com/api/logout", {
         method: "POST",
         credentials: "include"
       });
