@@ -1,5 +1,5 @@
 import { Layout } from "@/components/layout";
-import { useStore, Submission, Payout, User } from "@/lib/mock-data";
+import { useStore, Submission, Payout, User } from "@/lib/store";
 import { getWorkerRank } from "./dashboard-worker";
 import { CONFIG } from "@/lib/config";
 import { Button } from "@/components/ui/button";
@@ -32,15 +32,6 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGri
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-
-const MOCK_PLATFORM_DATA = [
-  { name: 'Jan', submissions: 400 },
-  { name: 'Feb', submissions: 600 },
-  { name: 'Mar', submissions: 800 },
-  { name: 'Apr', submissions: 750 },
-  { name: 'May', submissions: 900 },
-  { name: 'Jun', submissions: 1200 },
-];
 
 export default function AdminDashboard() {
   const { currentUser, tasks, submissions, payouts, reviewSubmission, addTask, markAsPaid } = useStore();
@@ -184,7 +175,7 @@ export default function AdminDashboard() {
               <CardContent className="px-6 pb-8 pt-10">
                 <div className="h-[320px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={MOCK_PLATFORM_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <BarChart data={[]} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                       <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 11, fontWeight: 700}} dy={15} />
                       <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 11, fontWeight: 700}} />
@@ -198,8 +189,8 @@ export default function AdminDashboard() {
                         cursor={{fill: '#f8fafc'}}
                       />
                       <Bar dataKey="submissions" radius={[6, 6, 0, 0]} barSize={40}>
-                        {MOCK_PLATFORM_DATA.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={index === MOCK_PLATFORM_DATA.length - 1 ? '#2563eb' : '#e2e8f0'} />
+                        {[].map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={index === [].length - 1 ? '#2563eb' : '#e2e8f0'} />
                         ))}
                       </Bar>
                     </BarChart>

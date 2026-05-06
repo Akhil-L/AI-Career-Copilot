@@ -1,5 +1,5 @@
 import { Layout } from "@/components/layout";
-import { useStore, Payout } from "@/lib/mock-data";
+import { useStore, Payout } from "@/lib/store";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";

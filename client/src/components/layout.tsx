@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { useStore } from "@/lib/mock-data";
+import { useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { 
   LayoutDashboard, 

@@ -1,5 +1,5 @@
 import { Layout } from "@/components/layout";
-import { useStore, Task, TRAINING_MODULES, User } from "@/lib/mock-data";
+import { useStore, Task, TRAINING_MODULES, User } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,16 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Link, useLocation } from "wouter";
 import { DollarSign, Clock, CheckCircle2, TrendingUp, ArrowRight, FileText, ShieldAlert, GraduationCap, AlertTriangle, Star, Award, BarChart3, Zap, ShieldCheck, ArrowUpRight } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
-
-const MOCK_CHART_DATA = [
-  { name: 'Mon', earnings: 12 },
-  { name: 'Tue', earnings: 18 },
-  { name: 'Wed', earnings: 15 },
-  { name: 'Thu', earnings: 25 },
-  { name: 'Fri', earnings: 32 },
-  { name: 'Sat', earnings: 28 },
-  { name: 'Sun', earnings: 40 },
-];
 
 export function getWorkerRank(user: User) {
   const accuracy = user.accuracyScore || 0;
@@ -181,7 +171,7 @@ export default function WorkerDashboard() {
               <CardContent className="px-6 pb-8 pt-10">
                 <div className="h-[280px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={MOCK_CHART_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <AreaChart data={[]} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                       <defs>
                         <linearGradient id="colorEarnings" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#2563eb" stopOpacity={0.15}/>

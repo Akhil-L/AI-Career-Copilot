@@ -1,0 +1,233 @@
+You are upgrading and stabilizing my existing full-stack marketplace platform project called “TaskFlow Hub / DataEntry Pro”.
+
+IMPORTANT:
+
+* DO NOT rebuild the project from scratch
+* DO NOT change the existing core architecture unnecessarily
+* Preserve working authentication/session logic
+* Preserve the existing premium branding/style direction
+* Work incrementally and safely
+* Focus on upgrading the current implementation into a polished startup-quality MVP
+
+====================================================
+CURRENT PROJECT STATUS
+======================
+
+Existing stack already implemented:
+
+* React frontend
+* Express backend
+* MongoDB/PostgreSQL database
+* Session-based authentication
+* Backend already deployed on Render
+* Frontend previously deployed on Netlify
+* Existing routes already implemented:
+
+  * /api/auth
+  * /api/login
+  * /api/logout
+  * /api/me
+  * /api/tasks
+
+Current functionality already partially works:
+
+* login/register
+* session auth
+* worker dashboard
+* task system
+* backend APIs
+
+Mock/demo data still exists in some places and must be fully removed.
+
+====================================================
+MAIN OBJECTIVE
+==============
+
+Upgrade the existing app into a polished production-style startup MVP similar to:
+
+* Fiverr
+* Upwork
+* Clickworker
+* Remotasks
+
+The platform should feel trustworthy, modern, responsive, and premium.
+
+====================================================
+CORE PLATFORM FLOW
+==================
+
+1. Client posts task
+2. Worker applies
+3. Client selects worker
+4. Worker submits work
+5. Client reviews/approves
+6. Worker wallet updates
+7. Ratings/reputation update
+
+====================================================
+IMPORTANT REQUIREMENTS
+======================
+
+* REMOVE all remaining mock/demo data completely
+* Use ONLY real backend APIs + database
+* Keep existing backend routes working
+* Fix broken UI/Tailwind issues
+* Preserve current functionality
+* Improve architecture without destructive rewrites
+
+====================================================
+AUTHENTICATION
+==============
+
+Keep and stabilize:
+
+* session-based authentication
+* secure cookies
+* persistent login after refresh
+* protected routes
+* role-based redirects
+
+Roles:
+
+* worker
+* client
+* admin
+
+Fix any redirect/auth persistence issues.
+
+====================================================
+WORKER FEATURES
+===============
+
+Improve and stabilize:
+
+* worker dashboard
+* available tasks
+* applied tasks
+* submitted tasks
+* earnings/wallet
+* ratings
+* profile section
+* notifications
+* training progress
+
+====================================================
+CLIENT FEATURES
+===============
+
+Improve:
+
+* client dashboard
+* task creation
+* applicants management
+* submissions review
+* approve/reject flow
+* worker ratings
+* spending overview
+
+====================================================
+ADMIN FEATURES
+==============
+
+Keep lightweight MVP admin features only:
+
+* manage users
+* moderate tasks
+* basic analytics
+* reports/disputes
+
+Do NOT overbuild admin systems yet.
+
+====================================================
+WALLET SYSTEM
+=============
+
+Implement a lightweight virtual wallet system.
+
+Requirements:
+
+* virtual balance
+* earnings history
+* transaction records
+
+When tasks are approved:
+
+* worker wallet balance increases
+
+IMPORTANT:
+Do NOT implement real banking or withdrawals yet.
+
+====================================================
+TRAINING SYSTEM
+===============
+
+Add lightweight training/progression structure:
+
+* basic training
+* premium access unlocks
+* progress indicators
+
+Use demo/mock progression logic only for now.
+
+====================================================
+MESSAGING
+=========
+
+Implement simple database-backed messaging.
+
+Requirements:
+
+* worker ↔ client chat
+* polling/refresh approach
+* NO WebSockets
+* lightweight MVP implementation
+
+====================================================
+UI/UX REQUIREMENTS
+==================
+
+Fix and polish the frontend UI professionally.
+
+Requirements:
+
+* Tailwind CSS working correctly everywhere
+* premium startup-quality appearance
+* modern cards/buttons/forms
+* responsive layouts
+* smooth dashboard experience
+* blue/white professional theme
+* beautiful sidebar/navigation
+* proper spacing/alignment
+* loading states
+* empty states
+
+The app should NOT look like plain HTML or a student project.
+
+====================================================
+TECHNICAL REQUIREMENTS
+======================
+
+* Keep code modular and scalable
+* Use reusable components
+* Keep proper API integration
+* Handle loading/errors correctly
+* Ensure deployment readiness
+* Avoid breaking working features
+
+====================================================
+FINAL OBJECTIVE
+===============
+
+The final result should feel like a real startup MVP:
+
+* polished UI
+* real backend integration
+* stable authentication
+* professional dashboards
+* real database persistence
+* clean workflow
+* deployable production-style architecture
+
+IMPORTANT:
+Prioritize stability and polish over adding excessive complexity.
+Do NOT perform destructive rewrites.

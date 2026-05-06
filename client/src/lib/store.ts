@@ -174,10 +174,6 @@ Accuracy isn't just a goal; it's our product. Every row you process contributes 
   }
 ];
 
-// --- MOCK DATA ---
-
-// Removed MOCK_USERS and MOCK_TASKS per instructions to use real backend data.
-
 // --- APP STATE ---
 
 interface AppState {
@@ -217,9 +213,7 @@ export const useStore = create<AppState>((set, get) => ({
   submissions: [],
   earnings: [],
   payouts: [],
-  notifications: [
-    { id: "n1", userId: "u2", title: "Welcome!", message: `Thanks for joining ${CONFIG.APP_NAME}.`, type: "info", read: false, createdAt: new Date().toISOString() }
-  ],
+  notifications: [],
   
   setTasks: (tasks) => set({ tasks }),
   setSubmissions: (submissions) => set({ submissions }),
@@ -386,42 +380,11 @@ export const useStore = create<AppState>((set, get) => ({
           tasks: state.tasks.map(t => t.id === taskId ? { ...t, status: "submitted" } : t)
         }));
       } else {
-        // Fallback for mockup if API fails
-        const newSubmission: Submission = {
-          id: Math.random().toString(36).substr(2, 9),
-          taskId,
-          workerId: state.currentUser.id,
-          submittedAt: new Date().toISOString(),
-          fileName,
-          rowCount: data.length,
-          previewData: data.slice(0, 10),
-          status: "pending"
-        };
-
-        set((state) => ({
-          submissions: [...state.submissions, newSubmission],
-          tasks: state.tasks.map(t => t.id === taskId ? { ...t, status: "submitted" } : t)
-        }));
+        throw new Error("Failed to submit task to backend");
       }
     } catch (error) {
       console.error("Failed to submit task:", error);
-      
-      // Fallback for mockup if API fails
-      const newSubmission: Submission = {
-        id: Math.random().toString(36).substr(2, 9),
-        taskId,
-        workerId: state.currentUser!.id,
-        submittedAt: new Date().toISOString(),
-        fileName,
-        rowCount: data.length,
-        previewData: data.slice(0, 10),
-        status: "pending"
-      };
-
-      set((state) => ({
-        submissions: [...state.submissions, newSubmission],
-        tasks: state.tasks.map(t => t.id === taskId ? { ...t, status: "submitted" } : t)
-      }));
+      throw error;
     }
   },
 
