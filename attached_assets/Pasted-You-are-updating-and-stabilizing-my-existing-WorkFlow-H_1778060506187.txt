@@ -1,0 +1,276 @@
+You are updating and stabilizing my existing WorkFlow Hub project inside Replit.
+
+IMPORTANT:
+Do NOT rebuild the project from scratch.
+Do NOT change the current UI branding/design style unless necessary.
+Preserve the existing premium Lexington Global Systems look and landing page styling.
+
+Current stack:
+
+* Frontend: React + Tailwind
+* Backend: FastAPI
+* Database: MongoDB
+* Routing: Wouter or existing routing system already used
+* Deployment/testing happens inside Replit first
+
+MAIN GOAL:
+Convert the current partially working app into a stable MVP using real backend/database integration instead of mock data.
+
+====================================================
+CORE PRODUCT IDEA
+=================
+
+The platform is a professional workflow/data-operations marketplace where:
+
+* Clients post data-entry/data-processing tasks
+* Workers apply and complete tasks
+* Clients review and approve work
+* Workers earn virtual wallet rewards
+* Platform looks premium, modern, enterprise-level
+
+Design inspiration:
+
+* enterprise dashboard SaaS
+* modern fintech/workflow tools
+* clean dark/light premium UI
+* responsive mobile-friendly layout
+
+Keep current Lexington branding and premium visual style.
+
+====================================================
+REQUIRED MVP FEATURES
+=====================
+
+Implement ONLY the MVP/core flow first.
+
+Required workflow:
+
+1. Authentication
+2. Client posts task
+3. Worker browses tasks
+4. Worker applies
+5. Worker submits work
+6. Client approves/rejects
+7. Wallet updates
+8. Ratings/reviews
+9. Simple messaging
+
+====================================================
+AUTHENTICATION
+==============
+
+Use:
+
+* Google Authentication
+* Backend-managed session/JWT cookies
+
+Requirements:
+
+* Login/Register works reliably
+* Protected routes
+* Persistent sessions
+* Logout works
+* User roles:
+
+  * worker
+  * client
+
+Frontend should redirect correctly after login.
+
+====================================================
+DATABASE REQUIREMENTS
+=====================
+
+Use MongoDB collections/models for:
+
+Users
+Tasks
+Applications
+Submissions
+Messages
+WalletTransactions
+Ratings
+
+REMOVE ALL MOCK DATA COMPLETELY.
+
+Do NOT use:
+
+* mock-data.ts
+* fake local arrays
+* temporary hardcoded state
+
+Everything must use real backend APIs + MongoDB.
+
+====================================================
+TASK SYSTEM
+===========
+
+Clients can:
+
+* create task
+* edit task
+* view submissions
+* approve/reject submissions
+
+Workers can:
+
+* browse tasks
+* apply
+* submit completed work
+* track earnings
+
+Task statuses:
+
+* open
+* assigned
+* submitted
+* approved
+* rejected
+
+====================================================
+WALLET SYSTEM
+=============
+
+IMPORTANT:
+Use virtual/mock wallet logic only.
+
+Do NOT implement:
+
+* real withdrawals
+* banking
+* payout systems
+
+Wallet features:
+
+* virtual balance
+* earnings history
+* transaction records
+
+When task approved:
+
+* worker virtual balance increases
+
+Use MongoDB tracking.
+
+====================================================
+PAYMENTS
+========
+
+Prepare Razorpay integration structure but keep implementation lightweight for now.
+
+Allow:
+
+* training fee purchase UI
+* package unlock UI
+* wallet top-up simulation
+
+Do NOT overcomplicate payment flow.
+
+====================================================
+MESSAGING
+=========
+
+Implement simple DB-backed messaging.
+
+NO WebSockets.
+
+Use:
+
+* polling/refresh approach
+* fetch messages every few seconds
+
+Users can:
+
+* send messages
+* view conversation history
+
+====================================================
+UI REQUIREMENTS
+===============
+
+Fix all UI issues.
+
+Tailwind must work correctly everywhere.
+
+Requirements:
+
+* responsive layouts
+* professional spacing
+* proper buttons/cards/forms
+* loading states
+* empty states
+* clean dashboards
+* premium enterprise feel
+
+DO NOT output broken/plain HTML.
+
+====================================================
+DASHBOARDS
+==========
+
+Worker dashboard:
+
+* available tasks
+* applied tasks
+* submitted tasks
+* wallet balance
+* ratings
+* messages
+
+Client dashboard:
+
+* posted tasks
+* applicants
+* submissions
+* approvals
+* worker ratings
+* payments
+
+Admin analytics can be skipped for now.
+
+====================================================
+API + BACKEND
+=============
+
+Connect frontend fully to backend APIs.
+
+Use:
+
+* credentials: "include"
+* proper error handling
+* loading states
+
+Fix:
+
+* routing issues
+* redirect issues
+* authentication persistence
+* API failures
+
+====================================================
+IMPORTANT DEVELOPMENT RULES
+===========================
+
+* Keep code modular and clean
+* Keep existing project structure where possible
+* Do NOT remove working features unnecessarily
+* Preserve existing styling direction
+* Prioritize stability over complexity
+* MVP first, advanced features later
+
+====================================================
+FINAL OBJECTIVE
+===============
+
+At the end, the app should feel like a real startup MVP:
+
+* polished UI
+* real backend integration
+* functional workflow
+* stable auth
+* working dashboards
+* database persistence
+* deployable without major fixes
+
+Work incrementally and safely.
+Fix existing issues before adding complex new systems.

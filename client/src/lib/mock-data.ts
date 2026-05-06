@@ -176,41 +176,7 @@ Accuracy isn't just a goal; it's our product. Every row you process contributes 
 
 // --- MOCK DATA ---
 
-export const MOCK_USERS: User[] = [
-  { id: "u1", name: "Admin User", email: "admin@dataentry.pro", role: "admin", balance: 0, completedModules: [], moduleAttempts: {}, accuracyScore: 100, approvedSubmissions: 0, rejectedSubmissions: 0 },
-  { id: "u2", name: "Sarah Worker", email: "sarah@worker.com", role: "worker", balance: 125.50, completedModules: ["m1", "m2", "m3", "m4"], moduleAttempts: { "m1": 1, "m2": 1, "m3": 1, "m4": 1 }, accuracyScore: 98, approvedSubmissions: 45, rejectedSubmissions: 1 },
-  { id: "u3", name: "John Data", email: "john@worker.com", role: "worker", balance: 45.00, completedModules: [], moduleAttempts: {}, accuracyScore: 85, approvedSubmissions: 12, rejectedSubmissions: 2 },
-  { id: "u4", name: "Acme Corp", email: "client@acme.com", role: "client", balance: 0, completedModules: [], moduleAttempts: {} },
-];
-
-export const MOCK_TASKS: Task[] = [
-  { 
-    id: "t1", 
-    title: "Fiscal Audit: Q1 Invoice Processing", 
-    description: "Verify and normalize high-volume invoice metadata from authenticated PDF sources into structured CSV output for enterprise ledger integration.", 
-    payPerRow: 0.25, 
-    status: "open", 
-    dataFields: ["Vendor ID", "Fiscal Date", "Net Amount", "Tax ID"], 
-    maxRows: CONFIG.DEFAULT_MAX_ROWS,
-    createdAt: "2024-02-10T10:00:00Z",
-    sourceDataUrl: "/data/enterprise_audit_q1.pdf",
-    clientId: "u4"
-  },
-  { 
-    id: "t2", 
-    title: "Inventory Asset Verification Cycle", 
-    description: "Perform secondary validation on global inventory logs. Specialists must cross-reference product identifiers with valid regional warehouse codes.", 
-    payPerRow: 0.15, 
-    status: "assigned", 
-    assignedTo: "u2",
-    dataFields: ["SKU-ID", "Asset Quantity", "Regional Hub"], 
-    maxRows: 50,
-    createdAt: "2024-02-11T09:30:00Z",
-    sourceDataUrl: "/data/inventory_verification_m2.xlsx",
-    validWarehouseNames: ["North-Hub", "East-Terminal", "South-Depot", "Central-Logistics"],
-    clientId: "u4"
-  }
-];
+// Removed MOCK_USERS and MOCK_TASKS per instructions to use real backend data.
 
 // --- APP STATE ---
 
@@ -259,28 +225,21 @@ export const useStore = create<AppState>((set, get) => ({
   setSubmissions: (submissions) => set({ submissions }),
   
   login: (email, role, name) => {
-    // Check if user exists in mock data, or create a temporary one for the session
-    const existingUser = MOCK_USERS.find(u => u.email === email);
-    
-    if (existingUser) {
-       set({ currentUser: existingUser });
-    } else {
-       // Initialize dynamic stats as 0 for new sessions
-       set({ 
-         currentUser: { 
-           id: "session_" + Math.random().toString(36).substr(2, 9), 
-           name: name || "User", 
-           email, 
-           role, 
-           balance: 0, 
-           completedModules: ["m1", "m2", "m3", "m4"], 
-           moduleAttempts: { "m1": 1, "m2": 1, "m3": 1, "m4": 1 },
-           accuracyScore: 0,
-           approvedSubmissions: 0,
-           rejectedSubmissions: 0
-         } 
-       });
-    }
+    // Initialize dynamic stats as 0 for new sessions
+    set({ 
+      currentUser: { 
+        id: "session_" + Math.random().toString(36).substr(2, 9), 
+        name: name || "User", 
+        email, 
+        role, 
+        balance: 0, 
+        completedModules: ["m1", "m2", "m3", "m4"], 
+        moduleAttempts: { "m1": 1, "m2": 1, "m3": 1, "m4": 1 },
+        accuracyScore: 0,
+        approvedSubmissions: 0,
+        rejectedSubmissions: 0
+      } 
+    });
   },
 
   logout: () => set({ currentUser: null }),

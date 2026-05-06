@@ -1,5 +1,5 @@
 import { Layout } from "@/components/layout";
-import { useStore, Submission, Payout, MOCK_USERS } from "@/lib/mock-data";
+import { useStore, Submission, Payout, User } from "@/lib/mock-data";
 import { getWorkerRank } from "./dashboard-worker";
 import { CONFIG } from "@/lib/config";
 import { Button } from "@/components/ui/button";
@@ -248,7 +248,8 @@ export default function AdminDashboard() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {MOCK_USERS.filter(u => u.role === 'worker').map(worker => {
+                    {/* Replace MOCK_USERS with an empty array or users from store once endpoint is available */}
+                    {[].filter((u: User) => u.role === 'worker').map(worker => {
                       const rank = getWorkerRank(worker);
                       return (
                         <TableRow key={worker.id} className="hover:bg-slate-50/50 transition-colors">
