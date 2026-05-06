@@ -92,6 +92,24 @@ export interface Notification {
   createdAt: string;
 }
 
+export interface Message {
+  id?: string;
+  _id?: string;
+  senderId: string;
+  receiverId: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+}
+
+export interface Conversation {
+  userId: string;
+  userName: string;
+  userRole: string;
+  lastMessage: Message;
+  unreadCount: number;
+}
+
 // --- TRAINING DATA ---
 
 export const TRAINING_MODULES: TrainingModule[] = [
@@ -183,6 +201,8 @@ interface AppState {
   earnings: Earning[];
   payouts: Payout[];
   notifications: Notification[];
+  messages: Message[];
+  conversations: Conversation[];
   
   login: (email: string, role: "admin" | "worker" | "client", name?: string) => void;
   logout: () => void;
@@ -205,6 +225,10 @@ interface AppState {
   setSubmissions: (submissions: Submission[]) => void;
   fetchTasks: () => Promise<void>;
   fetchSubmissions: () => Promise<void>;
+  fetchConversations: () => Promise<void>;
+  fetchMessages: (userId: string) => Promise<void>;
+  sendMessage: (receiverId: string, message: string) => Promise<void>;
+  markMessagesRead: (senderId: string) => Promise<void>;
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -214,6 +238,8 @@ export const useStore = create<AppState>((set, get) => ({
   earnings: [],
   payouts: [],
   notifications: [],
+  messages: [],
+  conversations: [],
   
   setTasks: (tasks) => set({ tasks }),
   setSubmissions: (submissions) => set({ submissions }),
@@ -544,6 +570,63 @@ export const useStore = create<AppState>((set, get) => ({
       }
     } catch (error) {
       console.error("Failed to fetch submissions:", error);
+    }
+  },
+
+  fetchConversations: async () => {
+    try {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/api/messages/conversations`, {
+        credentials: 'include'
+      });
+      if (response.ok) {
+        const data = await response.json();
+        set({ conversations: data });
+      }
+    } catch (error) {
+      console.error("Failed to fetch conversations:", error);
+    }
+  },
+
+  fetchMessages: async (userId) => {
+    try {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/api/messages/${userId}`, {
+        credentials: 'include'
+      });
+      if (response.ok) {
+        const data = await response.json();
+        set({ messages: data });
+      }
+    } catch (error) {
+      console.error("Failed to fetch messages:", error);
+    }
+  },
+
+  sendMessage: async (receiverId, message) => {
+    try {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/api/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ receiverId, message })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        set(state => ({ messages: [...state.messages, data] }));
+      }
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      throw error;
+    }
+  },
+
+  markMessagesRead: async (senderId) => {
+    try {
+      await fetch(`${CONFIG.API_BASE_URL}/api/messages/${senderId}/read`, {
+        method: 'PATCH',
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error("Failed to mark messages read:", error);
     }
   }
 }));

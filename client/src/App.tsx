@@ -14,6 +14,7 @@ import TaskDetail from "@/pages/task-detail";
 import TrainingPage from "@/pages/training";
 import PayoutsPage from "@/pages/payouts-worker";
 import ProfilePage from "@/pages/worker-profile";
+import MessagesPage from "@/pages/messages";
 import AboutPage from "@/pages/about";
 import ContactPage from "@/pages/contact";
 import ForBusinesses from "@/pages/for-businesses";
@@ -91,6 +92,7 @@ function Router() {
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/training" component={TrainingPage} />
       <Route path="/profile" component={ProfilePage} />
+      <Route path="/messages" component={MessagesPage} />
       <Route path="/task/:id" component={TaskDetail} />
       <Route path="/about" component={AboutPage} />
       <Route path="/contact" component={ContactPage} />

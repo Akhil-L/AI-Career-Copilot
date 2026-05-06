@@ -13,7 +13,8 @@ import {
   Globe,
   Shield,
   Briefcase,
-  User
+  User,
+  MessageSquare
 } from "lucide-react";
 import { useState } from "react";
 import { 
@@ -32,11 +33,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const unreadCount = notifications.filter(n => n.userId === currentUser?.id && !n.read).length;
 
   const navItems = currentUser?.role === 'admin' 
-    ? [{ label: "Admin Portal", href: "/admin", icon: Shield }]
+    ? [
+        { label: "Admin Portal", href: "/admin", icon: Shield },
+        { label: "Messages", href: "/messages", icon: MessageSquare }
+      ]
     : currentUser?.role === 'client'
-    ? [{ label: "Client Portal", href: "/client", icon: Briefcase }]
+    ? [
+        { label: "Client Portal", href: "/client", icon: Briefcase },
+        { label: "Messages", href: "/messages", icon: MessageSquare }
+      ]
     : [
         { label: "Work Hub", href: "/dashboard", icon: LayoutDashboard },
+        { label: "Messages", href: "/messages", icon: MessageSquare },
         { label: "Academy", href: "/training", icon: GraduationCap },
         { label: "Earnings", href: "/payouts", icon: CreditCard },
         { label: "My Profile", href: "/profile", icon: User },
