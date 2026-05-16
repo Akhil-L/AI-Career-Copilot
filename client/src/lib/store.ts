@@ -204,8 +204,9 @@ interface AppState {
   messages: Message[];
   conversations: Conversation[];
   
-  login: (email: string, role: "admin" | "worker" | "client", name?: string) => void;
+  login: (email: string, password?: string, role?: "admin" | "worker" | "client", name?: string) => boolean;
   logout: () => void;
+  register: (name: string, email: string, password?: string, role?: string) => void;
   
   registerAttempt: (moduleId: string) => void;
   completeModule: (moduleId: string) => void;
@@ -244,14 +245,32 @@ export const useStore = create<AppState>((set, get) => ({
   setTasks: (tasks) => set({ tasks }),
   setSubmissions: (submissions) => set({ submissions }),
   
-  login: (email, role, name) => {
+  login: (email, password, role, name) => {
     // Initialize dynamic stats as 0 for new sessions
     set({ 
       currentUser: { 
         id: "session_" + Math.random().toString(36).substr(2, 9), 
         name: name || "User", 
         email, 
-        role, 
+        role: (role as "admin" | "worker" | "client") || "worker", 
+        balance: 0, 
+        completedModules: ["m1", "m2", "m3", "m4"], 
+        moduleAttempts: { "m1": 1, "m2": 1, "m3": 1, "m4": 1 },
+        accuracyScore: 0,
+        approvedSubmissions: 0,
+        rejectedSubmissions: 0
+      } 
+    });
+    return true; // add return for auth
+  },
+
+  register: (name, email, password, role) => {
+    set({ 
+      currentUser: { 
+        id: "session_" + Math.random().toString(36).substr(2, 9), 
+        name, 
+        email, 
+        role: (role as "admin" | "worker" | "client") || "worker", 
         balance: 0, 
         completedModules: ["m1", "m2", "m3", "m4"], 
         moduleAttempts: { "m1": 1, "m2": 1, "m3": 1, "m4": 1 },
