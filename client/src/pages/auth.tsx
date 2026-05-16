@@ -106,9 +106,6 @@ export default function AuthPage() {
                     <Button type="submit" className="w-full h-12 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-base shadow-sm transition-all hover:-translate-y-0.5">
                       Log In <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
-                    <div className="text-center mt-4">
-                      <p className="text-xs text-slate-500 font-medium">Demo Accounts: demo@student.com (Student) / admin@copilot.com (Admin) <br/> Password: password123</p>
-                    </div>
                   </form>
                 </TabsContent>
                 
