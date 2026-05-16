@@ -7,17 +7,17 @@ import { useStore } from "@/lib/store";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Auth from "@/pages/auth";
-import WorkerDashboard from "@/pages/dashboard-worker";
-import AdminDashboard from "@/pages/dashboard-admin";
-import TaskDetail from "@/pages/task-detail";
-import TrainingPage from "@/pages/training";
-import PayoutsPage from "@/pages/payouts-worker";
-import ProfilePage from "@/pages/worker-profile";
+import Dashboard from "@/pages/dashboard";
+import SkillGap from "@/pages/skill-gap";
+import ResumeUpload from "@/pages/resume-upload";
+import InterviewPrep from "@/pages/interview-prep";
+import ResumeHistory from "@/pages/resume-history";
+import ProfilePage from "@/pages/profile";
 import MessagesPage from "@/pages/messages";
 import AboutPage from "@/pages/about";
 import ContactPage from "@/pages/contact";
 import ForBusinesses from "@/pages/for-businesses";
-import ClientDashboard from "@/pages/dashboard-client";
+import AtsAnalysis from "@/pages/ats-analysis";
 import { TermsPage, PrivacyPage, PayoutPolicyPage } from "@/pages/legal";
 
 function Router() {
@@ -39,33 +39,13 @@ function Router() {
           // Store actual user data and map it to our UI store structure
           login(userData.email, userData.role || "worker", userData.name);
           
-          // Fetch initial data after successful login
-          await Promise.all([
-            fetchTasks(),
-            fetchSubmissions()
-          ]);
-          
           // Route protection based on role
           const role = userData.role || "worker";
           const path = location;
           
-          // Worker trying to access admin/client routes
-          if (role === "worker" && (path.startsWith("/admin") || path.startsWith("/client"))) {
-            setLocation("/dashboard");
-          } 
-          // Admin trying to access worker/client routes
-          else if (role === "admin" && (path.startsWith("/dashboard") || path.startsWith("/training") || path.startsWith("/payouts") || path.startsWith("/client"))) {
-            setLocation("/admin");
-          }
-          // Client trying to access admin/worker routes
-          else if (role === "client" && (path.startsWith("/dashboard") || path.startsWith("/training") || path.startsWith("/payouts") || path.startsWith("/admin"))) {
-            setLocation("/client");
-          }
           // Redirect to respective dashboards if on root but logged in (optional but good UX)
-          else if (path === "/" || path === "/auth") {
-            if (role === "admin") setLocation("/admin");
-            else if (role === "client") setLocation("/client");
-            else setLocation("/dashboard");
+          if (path === "/" || path === "/auth") {
+            setLocation("/dashboard");
           }
         } else {
           logout();
@@ -85,14 +65,14 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/auth" component={Auth} />
-      <Route path="/dashboard" component={WorkerDashboard} />
-      <Route path="/client" component={ClientDashboard} />
-      <Route path="/payouts" component={PayoutsPage} />
-      <Route path="/admin" component={AdminDashboard} />
-      <Route path="/training" component={TrainingPage} />
+      <Route path="/dashboard" component={Dashboard} />
+      <Route path="/ats-analysis" component={AtsAnalysis} />
+      <Route path="/resume-history" component={ResumeHistory} />
+      <Route path="/skill-gap" component={SkillGap} />
+      <Route path="/interview-prep" component={InterviewPrep} />
       <Route path="/profile" component={ProfilePage} />
       <Route path="/messages" component={MessagesPage} />
-      <Route path="/task/:id" component={TaskDetail} />
+      <Route path="/resume-upload" component={ResumeUpload} />
       <Route path="/about" component={AboutPage} />
       <Route path="/contact" component={ContactPage} />
       <Route path="/businesses" component={ForBusinesses} />

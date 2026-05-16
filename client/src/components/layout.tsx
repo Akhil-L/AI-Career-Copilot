@@ -4,17 +4,18 @@ import { Button } from "@/components/ui/button";
 import { 
   LayoutDashboard, 
   GraduationCap, 
-  CreditCard, 
   LogOut, 
   Bell,
   Menu,
   X,
-  ChevronRight,
   Globe,
   Shield,
   Briefcase,
   User,
-  MessageSquare
+  MessageSquare,
+  FileText,
+  LineChart,
+  Target
 } from "lucide-react";
 import { useState } from "react";
 import { 
@@ -32,26 +33,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   const unreadCount = notifications.filter(n => n.userId === currentUser?.id && !n.read).length;
 
-  const navItems = currentUser?.role === 'admin' 
-    ? [
-        { label: "Admin Portal", href: "/admin", icon: Shield },
-        { label: "Messages", href: "/messages", icon: MessageSquare }
-      ]
-    : currentUser?.role === 'client'
-    ? [
-        { label: "Client Portal", href: "/client", icon: Briefcase },
-        { label: "Messages", href: "/messages", icon: MessageSquare }
-      ]
-    : [
-        { label: "Work Hub", href: "/dashboard", icon: LayoutDashboard },
-        { label: "Messages", href: "/messages", icon: MessageSquare },
-        { label: "Academy", href: "/training", icon: GraduationCap },
-        { label: "Earnings", href: "/payouts", icon: CreditCard },
-        { label: "My Profile", href: "/profile", icon: User },
-      ];
+  const navItems = [
+    { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { label: "Upload Resume", href: "/resume-upload", icon: FileText },
+    { label: "ATS Analysis", href: "/ats-analysis", icon: LineChart },
+    { label: "Skill Gap", href: "/skill-gap", icon: Target },
+    { label: "Interview Prep", href: "/interview-prep", icon: GraduationCap },
+    { label: "Profile", href: "/profile", icon: User },
+  ];
 
   const publicLinks = [
-    { label: "For Businesses", href: "/businesses" },
+    { label: "For Universities", href: "/businesses" },
     { label: "About Us", href: "/about" },
     { label: "Contact", href: "/contact" },
   ];
@@ -77,11 +69,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-12">
             <Link href="/" className="flex items-center gap-3 group">
               <div className="h-11 w-11 bg-gradient-to-tr from-blue-700 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-all duration-300 group-hover:rotate-3">
-                <Globe className="h-6 w-6 text-white" />
+                <Target className="h-6 w-6 text-white" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-heading font-black tracking-tight text-slate-900 leading-none">LEXINGTON</span>
-                <span className="text-[10px] font-bold text-blue-600 tracking-[0.25em] uppercase mt-1">Global Systems</span>
+                <span className="text-xl font-heading font-black tracking-tight text-slate-900 leading-none">AI CAREER</span>
+                <span className="text-[10px] font-bold text-blue-600 tracking-[0.25em] uppercase mt-1">Copilot</span>
               </div>
             </Link>
 
@@ -231,20 +223,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div className="grid md:grid-cols-4 gap-12 mb-16">
             <div className="col-span-2 space-y-6">
               <div className="flex items-center gap-2">
-                <Globe className="h-8 w-8 text-blue-500" />
-                <span className="text-2xl font-heading font-black tracking-tight uppercase">Lexington Global</span>
+                <Target className="h-8 w-8 text-blue-500" />
+                <span className="text-2xl font-heading font-black tracking-tight uppercase">AI Career Copilot</span>
               </div>
               <p className="text-slate-400 text-lg leading-relaxed max-w-md">
-                Enterprise-grade data processing and verification systems for the modern global economy. Certified accuracy at scale.
+                AI-powered resume analysis, interview prep, and career guidance tailored for the Indian tech industry.
               </p>
             </div>
             <div>
               <h4 className="font-bold text-white mb-6 uppercase text-sm tracking-widest">Platform</h4>
               <ul className="space-y-4 text-slate-400 font-medium">
-                <li><Link href="/businesses" className="hover:text-blue-400 transition-colors">For Businesses</Link></li>
+                <li><Link href="/businesses" className="hover:text-blue-400 transition-colors">For Universities</Link></li>
                 <li><Link href="/about" className="hover:text-blue-400 transition-colors">About Us</Link></li>
                 <li><Link href="/contact" className="hover:text-blue-400 transition-colors">Contact Support</Link></li>
-                <li><Link href="/auth?tab=register" className="hover:text-blue-400 transition-colors">Apply as Specialist</Link></li>
               </ul>
             </div>
             <div>
@@ -252,15 +243,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <ul className="space-y-4 text-slate-400 font-medium">
                 <li><Link href="/terms" className="hover:text-blue-400 transition-colors">Terms of Service</Link></li>
                 <li><Link href="/privacy" className="hover:text-blue-400 transition-colors">Privacy Policy</Link></li>
-                <li><Link href="/payout-policy" className="hover:text-blue-400 transition-colors">Payout Policy</Link></li>
               </ul>
             </div>
           </div>
           <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-slate-500 text-sm">
-            <p>© 2026 Lexington Global Systems. All rights reserved.</p>
+            <p>© 2026 AI Career Copilot. All rights reserved.</p>
             <div className="flex gap-8">
-              <span className="flex items-center gap-2"><Shield className="h-4 w-4" /> Bank-Grade Security</span>
-              <span className="flex items-center gap-2"><Globe className="h-4 w-4" /> Global Infrastructure</span>
+              <span className="flex items-center gap-2"><Shield className="h-4 w-4" /> Secure Processing</span>
+              <span className="flex items-center gap-2"><Globe className="h-4 w-4" /> Built for India</span>
             </div>
           </div>
         </div>

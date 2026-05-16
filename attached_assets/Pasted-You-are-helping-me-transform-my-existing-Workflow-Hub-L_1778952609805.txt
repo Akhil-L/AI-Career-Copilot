@@ -1,0 +1,229 @@
+You are helping me transform my existing Workflow Hub / Lexington Global Systems frontend into a new AI-powered SaaS platform called:
+
+AI Career Copilot
+
+IMPORTANT:
+DO NOT rebuild from scratch.
+Reuse my existing React + TypeScript frontend architecture, layouts, components, dashboard styling, navbar, auth pages, cards, charts, and responsive system.
+
+The current project already contains:
+- authentication pages
+- enterprise dashboard UI
+- role-based layouts
+- navbar/header/footer
+- cards/charts
+- responsive design
+- premium SaaS styling
+- React + TypeScript + Vite setup
+
+Your job is to MODIFY and REPURPOSE the existing frontend into an AI Resume Analysis platform.
+
+---------------------------------------------------
+TECH STACK
+---------------------------------------------------
+
+Frontend:
+- React
+- TypeScript
+- Vite
+- TailwindCSS
+- shadcn/ui
+
+Backend (separate project):
+- FastAPI
+- Python
+- PostgreSQL
+- JWT Auth
+- AI APIs
+
+---------------------------------------------------
+GOAL
+---------------------------------------------------
+
+Convert the current data-entry freelancing platform into an AI Resume Analysis SaaS product for Indian students and job seekers.
+
+The final platform should feel like:
+- modern SaaS
+- AI-powered
+- premium
+- recruiter-focused
+- dashboard-heavy
+- minimal but powerful
+
+---------------------------------------------------
+IMPORTANT:
+DO NOT CHANGE:
+---------------------------------------------------
+
+- existing layout system
+- overall design language
+- responsiveness
+- theme/colors unless necessary
+- navbar structure
+- authentication flow architecture
+
+ONLY replace:
+- page names
+- dashboard widgets
+- task-related systems
+- data-entry terminology
+
+---------------------------------------------------
+REPLACE CURRENT FEATURES
+---------------------------------------------------
+
+OLD PLATFORM:
+- tasks
+- workers
+- clients
+- earnings
+- payouts
+- task approvals
+
+NEW PLATFORM:
+- resume upload
+- ATS scoring
+- skill gap analysis
+- AI interview questions
+- resume history
+- analytics
+- AI insights
+
+---------------------------------------------------
+NEW PAGES TO CREATE
+---------------------------------------------------
+
+1. Dashboard
+Main AI overview page showing:
+- ATS Score
+- Resume Health
+- Skill Match %
+- Upload count
+- Recent analyses
+- Improvement trends
+- AI suggestions
+
+2. Resume Upload Page
+Features:
+- Drag & drop PDF upload
+- Upload progress
+- Resume preview
+- Analyze button
+
+3. ATS Analysis Page
+Show:
+- ATS score
+- matched keywords
+- missing keywords
+- recruiter compatibility
+- formatting score
+- improvement suggestions
+
+4. Skill Gap Analysis Page
+Show:
+- missing skills
+- recommended skills
+- market demand
+- Indian hiring trends
+- roadmap suggestions
+
+5. Interview Questions Page
+AI-generated interview questions based on:
+- uploaded resume
+- job description
+- Indian hiring patterns
+
+6. Resume History Page
+Show:
+- previous uploads
+- scores
+- timestamps
+- improvement tracking
+
+7. Profile Page
+Show:
+- name
+- email
+- CGPA
+- college
+- target role
+- resume stats
+
+---------------------------------------------------
+INDIAN JOB MARKET FOCUS
+---------------------------------------------------
+
+Design the platform specifically for:
+- Indian students
+- tier-2 colleges
+- freshers
+- internships
+- entry-level software jobs
+
+Recognize:
+- Infosys/TCS/Wipro stacks
+- Indian resume patterns
+- CGPA importance
+- ATS compatibility for Indian recruiters
+
+---------------------------------------------------
+DESIGN DIRECTION
+---------------------------------------------------
+
+Keep existing:
+- premium enterprise feel
+- clean dashboard cards
+- charts
+- glassmorphism
+- soft shadows
+- blue gradients
+- modern typography
+
+The platform should look like:
+- LinkedIn Premium
+- Notion AI
+- modern HR SaaS
+- AI recruiting platform
+
+---------------------------------------------------
+REMOVE
+---------------------------------------------------
+
+Completely remove:
+- task marketplace logic
+- client/worker terminology
+- earnings/payout systems
+- freelancing concepts
+- task approval flows
+
+---------------------------------------------------
+FRONTEND STRUCTURE
+---------------------------------------------------
+
+Reuse existing:
+- components
+- layout system
+- navbar
+- cards
+- chart components
+- auth pages
+
+Only modify content and business logic.
+
+---------------------------------------------------
+OUTPUT REQUIREMENTS
+---------------------------------------------------
+
+- Give FULL FILES when editing
+- Do NOT give partial snippets
+- Maintain clean folder structure
+- Use reusable components
+- Keep TypeScript clean
+- Ensure responsive UI
+- Avoid unnecessary complexity
+
+---------------------------------------------------
+FINAL GOAL
+---------------------------------------------------
+
+The final product should feel like a production-grade AI Resume Copilot platform that could realistically launch as a startup.
