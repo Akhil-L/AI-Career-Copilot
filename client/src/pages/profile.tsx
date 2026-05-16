@@ -2,85 +2,83 @@ import { Layout } from "@/components/layout";
 import { useStore } from "@/lib/store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  User, 
-  ShieldCheck, 
-  Target, 
-  CheckCircle2, 
-  Briefcase,
-  Mail,
-  Calendar,
-  Code
-} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { User, Mail, Link as LinkIcon, Github, Linkedin, ShieldCheck } from "lucide-react";
+import { getStudentRank } from "./dashboard";
 
 export default function Profile() {
   const { currentUser } = useStore();
+  if (!currentUser) return <div>Please log in</div>;
 
-  if (!currentUser) {
-    return <Layout><div className="py-20 text-center">Please login</div></Layout>;
-  }
+  const dynamicUser = { ...currentUser, accuracyScore: currentUser.accuracyScore || 72 };
+  const rank = getStudentRank(dynamicUser);
 
   return (
     <Layout>
-      <div className="max-w-5xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
-        <div className="relative">
-          <div className="h-48 w-full bg-gradient-to-r from-blue-700 to-indigo-800 rounded-[2.5rem] shadow-2xl shadow-blue-500/20"></div>
-          <div className="px-10 -mt-16 flex flex-col md:flex-row items-end gap-8 relative z-10">
-            <div className="h-32 w-32 rounded-3xl bg-white p-2 shadow-xl">
-              <div className="h-full w-full bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center text-4xl font-black text-slate-400 uppercase">
-                {currentUser.name[0]}
-              </div>
-            </div>
-            <div className="flex-1 pb-4">
-              <div className="flex items-center gap-4 mb-2">
-                <h1 className="text-3xl font-black text-slate-900 tracking-tight">{currentUser.name}</h1>
-                <Badge className="bg-blue-100 text-blue-700 border-none font-bold">Pro Plan</Badge>
-              </div>
-              <div className="flex flex-wrap gap-6 text-sm font-bold text-slate-500 uppercase tracking-widest">
-                <span className="flex items-center gap-2"><Briefcase className="h-4 w-4 text-blue-600" /> Software Engineer</span>
-                <span className="flex items-center gap-2"><Mail className="h-4 w-4 text-blue-600" /> {currentUser.email}</span>
-                <span className="flex items-center gap-2"><Calendar className="h-4 w-4 text-blue-600" /> Joined May 2026</span>
-              </div>
-            </div>
-          </div>
+      <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div>
+          <h1 className="text-3xl font-heading font-black text-slate-900">Profile Settings</h1>
+          <p className="text-slate-500 mt-1">Manage your account and connected profiles.</p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          <Card className="rounded-[2rem] premium-shadow border-slate-200/60 bg-white md:col-span-1">
-            <CardHeader>
-              <CardTitle className="text-lg font-black text-slate-900">Career Stats</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-               <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Profile Strength</p>
-                  <p className="text-2xl font-black text-slate-900">85%</p>
-                </div>
-                <Target className="h-8 w-8 text-blue-500" />
+        <div className="grid md:grid-cols-3 gap-6">
+          <Card className="md:col-span-1 bg-white border-slate-100 rounded-[1.5rem] shadow-sm">
+            <CardContent className="p-6 text-center">
+              <div className="h-24 w-24 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-sm">
+                <span className="text-3xl font-black">{currentUser.name[0]}</span>
               </div>
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Interviews Prepped</p>
-                  <p className="text-2xl font-black text-slate-900">12</p>
-                </div>
-                <ShieldCheck className="h-8 w-8 text-emerald-500" />
-              </div>
+              <h3 className="font-bold text-lg text-slate-900">{currentUser.name}</h3>
+              <p className="text-sm text-slate-500 mb-4">{currentUser.email}</p>
+              <Badge className={`font-bold px-3 py-1 shadow-sm w-full justify-center ${rank.color}`}>
+                <ShieldCheck className="h-4 w-4 mr-1.5" /> {rank.label}
+              </Badge>
             </CardContent>
           </Card>
 
-          <Card className="rounded-[2rem] premium-shadow border-slate-200/60 bg-white md:col-span-2">
-            <CardHeader>
-              <CardTitle className="text-lg font-black text-slate-900">Verified Skills</CardTitle>
+          <Card className="md:col-span-2 bg-white border-slate-100 rounded-[1.5rem] shadow-sm">
+            <CardHeader className="border-b border-slate-50 p-6 pb-4">
+              <CardTitle className="text-lg font-bold text-slate-900">Personal Information</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-3">
-                {['React.js', 'TypeScript', 'Node.js', 'System Design', 'Docker'].map((skill) => (
-                  <div key={skill} className="px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl flex items-center gap-2">
-                    <Code className="h-4 w-4 text-blue-500" />
-                    <span className="font-bold text-slate-700 text-sm">{skill}</span>
-                    <CheckCircle2 className="h-3 w-3 text-emerald-500 ml-2" />
+            <CardContent className="p-6 space-y-6">
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label className="font-bold text-slate-700">Full Name</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
+                    <Input defaultValue={currentUser.name} className="pl-10 h-11 rounded-xl bg-slate-50 border-slate-200 focus-visible:ring-purple-500 font-medium" />
                   </div>
-                ))}
+                </div>
+                <div className="space-y-2">
+                  <Label className="font-bold text-slate-700">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
+                    <Input defaultValue={currentUser.email} disabled className="pl-10 h-11 rounded-xl bg-slate-50/50 border-slate-200 text-slate-500" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 pt-4 border-t border-slate-50">
+                <h4 className="font-bold text-sm text-slate-900 uppercase tracking-widest">Connected Links</h4>
+                <div className="space-y-4">
+                  <div className="flex gap-4">
+                    <div className="relative flex-1">
+                      <Linkedin className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
+                      <Input placeholder="LinkedIn URL" className="pl-10 h-11 rounded-xl bg-slate-50 border-slate-200 focus-visible:ring-purple-500" />
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="relative flex-1">
+                      <Github className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
+                      <Input placeholder="GitHub URL" className="pl-10 h-11 rounded-xl bg-slate-50 border-slate-200 focus-visible:ring-purple-500" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-4">
+                <Button className="bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl px-8 h-11">Save Changes</Button>
               </div>
             </CardContent>
           </Card>

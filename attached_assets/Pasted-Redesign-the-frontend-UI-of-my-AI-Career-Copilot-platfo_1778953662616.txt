@@ -1,0 +1,84 @@
+Redesign the frontend UI of my AI Career Copilot platform to feel ORIGINAL and distinct from the previous enterprise workflow platform it was built from.
+
+Current problem:
+The platform still visually resembles a corporate workflow/dashboard product with enterprise styling, dark overlays, and admin-system aesthetics.
+
+I want the UI transformed into a modern AI-powered career growth SaaS similar in feel to:
+- Enhancv
+- Teal
+- ResumeWorded
+- Simplify
+- Huntr
+
+Design goals:
+- Clean
+- Minimal
+- Soft
+- Friendly
+- Career-focused
+- Student-focused
+- AI-powered aesthetic
+- Modern SaaS look
+- Premium but approachable
+
+IMPORTANT CHANGES:
+1. Remove heavy enterprise/dashboard feeling
+2. Remove Lexington-style branding remnants
+3. Reduce dark overlays and industrial visuals
+4. Use brighter layouts and more whitespace
+5. Make sections feel airy and modern
+6. Use subtle gradients instead of dark backgrounds
+7. Improve mobile responsiveness
+8. Use softer shadows and rounded cards
+9. Make upload sections more prominent and interactive
+10. Use modern onboarding/productivity app styling
+
+Visual Direction:
+- White/light gray backgrounds
+- Blue/purple gradients
+- Glassmorphism only subtly
+- Rounded-xl cards/buttons
+- Cleaner typography hierarchy
+- More spacing between sections
+- Friendly illustrations/icons
+- Modern startup SaaS design
+
+Update:
+- Hero section
+- Navbar
+- Dashboard cards
+- Upload resume page
+- ATS analysis page
+- Skill gap page
+- Interview prep page
+- Auth screens
+- Sidebar/topbar styling
+
+Hero Section:
+Replace the current “corporate operations” style hero with:
+- career growth messaging
+- AI assistant visuals
+- resume optimization theme
+- student/job seeker imagery
+- modern gradient backgrounds
+
+Add modern UI sections:
+- “How It Works”
+- “ATS Score Preview”
+- “Trusted by Students”
+- “AI Features”
+- “Resume Improvements”
+- “Interview Readiness”
+
+Typography:
+Use a modern SaaS typography style similar to:
+- Inter
+- Satoshi
+- Plus Jakarta Sans
+
+Animations:
+Add subtle hover animations, transitions, and smooth microinteractions.
+
+DO NOT rebuild the app from scratch.
+Reuse existing React components/pages/layouts where possible.
+Only redesign the visual system and UX styling to create a distinct AI career platform identity.

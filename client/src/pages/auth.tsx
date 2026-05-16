@@ -1,127 +1,144 @@
+import { useState } from "react";
 import { useLocation } from "wouter";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Target, ArrowRight, Sparkles } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useToast } from "@/hooks/use-toast";
-import { Target } from "lucide-react";
 
-const authSchema = z.object({
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
-  email: z.string().email("Please enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-export default function Auth() {
+export default function AuthPage() {
   const [, setLocation] = useLocation();
-  const { login } = useStore();
+  const { login, register } = useStore();
   const { toast } = useToast();
   
-  const search = window.location.search;
-  const params = new URLSearchParams(search);
-  const defaultTab = params.get("tab") || "login";
+  const searchParams = new URLSearchParams(window.location.search);
+  const defaultTab = searchParams.get('tab') === 'register' ? 'register' : 'login';
   
-  const form = useForm<z.infer<typeof authSchema>>({
-    resolver: zodResolver(authSchema),
-    defaultValues: { email: "", password: "", firstName: "", lastName: "" },
-  });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
 
-  const onSubmit = async (values: z.infer<typeof authSchema>, isRegister: boolean) => {
-    // For mockup purposes, we bypass the actual API calls to avoid backend dependency issues during rapid redesign
-    // We just simulate a successful login as a student.
-    const name = isRegister ? `${values.firstName} ${values.lastName}`.trim() : "Student User";
-    
-    setTimeout(() => {
-      login(values.email, "student" as any, name || "Student User");
-      toast({ title: "Welcome to AI Copilot", description: "Let's land your dream job." });
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    const success = login(email, password);
+    if (success) {
+      toast({ title: "Welcome back", description: "Successfully logged in." });
       setLocation("/dashboard");
-    }, 500);
+    } else {
+      toast({ variant: "destructive", title: "Login failed", description: "Invalid email or password." });
+    }
+  };
+
+  const handleRegister = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !email || !password) {
+      toast({ variant: "destructive", title: "Missing fields", description: "Please fill out all fields." });
+      return;
+    }
+    register(name, email, password, "freelancer");
+    toast({ title: "Account created", description: "Welcome to AI Career Copilot!" });
+    setLocation("/dashboard");
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md animate-in fade-in zoom-in duration-300">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center p-4 rounded-2xl bg-blue-600 text-white mb-4 shadow-xl shadow-blue-500/20">
-            <Target className="h-8 w-8" />
+    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row overflow-hidden selection:bg-purple-100 selection:text-purple-900">
+      
+      {/* Visual Brand Section */}
+      <div className="hidden md:flex flex-col justify-between w-1/2 p-12 bg-slate-900 relative">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-purple-900/40 via-slate-900 to-slate-900"></div>
+        <div className="relative z-10">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 bg-purple-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
+              <Target className="h-6 w-6 text-white" />
+            </div>
+            <span className="text-2xl font-heading font-black tracking-tight text-white">Copilot</span>
           </div>
-          <h1 className="text-3xl font-heading font-black text-slate-900 tracking-tight">AI Career Copilot</h1>
-          <p className="text-slate-500 mt-2 font-medium">Your unfair advantage in tech hiring</p>
         </div>
+        <div className="relative z-10 space-y-6">
+          <h1 className="text-5xl font-heading font-black text-white leading-[1.1]">
+            Your Resume's <br />
+            <span className="text-purple-400">Secret Weapon.</span>
+          </h1>
+          <p className="text-slate-300 text-lg max-w-md font-medium">
+            Join thousands of students who cracked their dream tech interviews with AI-powered resume analysis.
+          </p>
+        </div>
+        <div className="relative z-10">
+           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-white font-bold text-sm">
+             <Sparkles className="h-4 w-4 text-purple-400" /> Trusted by students from Tier-1/Tier-2 colleges
+           </div>
+        </div>
+      </div>
 
-        <Tabs defaultValue={defaultTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6 h-12 bg-white border border-slate-200/50 p-1 rounded-xl">
-            <TabsTrigger value="login" className="rounded-lg font-bold">Login</TabsTrigger>
-            <TabsTrigger value="register" className="rounded-lg font-bold">Sign Up</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="login">
-            <Card className="border-none shadow-2xl shadow-slate-200/50 rounded-3xl overflow-hidden">
-              <CardHeader className="bg-white p-8 pb-4">
-                <CardTitle className="text-2xl font-black">Welcome Back</CardTitle>
-                <CardDescription className="text-slate-500 font-medium">Access your resume reports and prep materials.</CardDescription>
-              </CardHeader>
-              <CardContent className="bg-white p-8 pt-4">
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit((v) => onSubmit(v, false))} className="space-y-5">
-                    <FormField control={form.control} name="email" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="font-bold text-slate-700">Email Address</FormLabel>
-                        <FormControl><Input placeholder="student@college.edu" className="h-12 rounded-xl bg-slate-50 border-slate-200" {...field} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-                    <FormField control={form.control} name="password" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="font-bold text-slate-700">Password</FormLabel>
-                        <FormControl><Input type="password" placeholder="••••••••" className="h-12 rounded-xl bg-slate-50 border-slate-200" {...field} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-                    <Button type="submit" className="w-full h-12 rounded-xl font-bold bg-blue-600 hover:bg-blue-500 shadow-lg shadow-blue-500/20 text-base mt-2">Sign In</Button>
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="register">
-            <Card className="border-none shadow-2xl shadow-slate-200/50 rounded-3xl overflow-hidden">
-              <CardHeader className="bg-white p-8 pb-4">
-                <CardTitle className="text-2xl font-black">Join Copilot</CardTitle>
-                <CardDescription className="text-slate-500 font-medium">Crack your next interview.</CardDescription>
-              </CardHeader>
-              <CardContent className="bg-white p-8 pt-4">
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit((v) => onSubmit(v, true))} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField control={form.control} name="firstName" render={({ field }) => (
-                        <FormItem><FormLabel className="font-bold">First Name</FormLabel><FormControl><Input className="h-11 rounded-xl bg-slate-50 border-slate-200" {...field} /></FormControl></FormItem>
-                      )} />
-                      <FormField control={form.control} name="lastName" render={({ field }) => (
-                        <FormItem><FormLabel className="font-bold">Last Name</FormLabel><FormControl><Input className="h-11 rounded-xl bg-slate-50 border-slate-200" {...field} /></FormControl></FormItem>
-                      )} />
+      {/* Auth Form Section */}
+      <div className="w-full md:w-1/2 flex items-center justify-center p-6 md:p-12 relative">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-200/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+        
+        <div className="w-full max-w-md relative z-10">
+          <Card className="bg-white/80 backdrop-blur-xl border-slate-100 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+            <CardContent className="p-8">
+              <Tabs defaultValue={defaultTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-8 bg-slate-100 p-1 rounded-xl">
+                  <TabsTrigger value="login" className="rounded-lg font-bold">Log In</TabsTrigger>
+                  <TabsTrigger value="register" className="rounded-lg font-bold">Sign Up</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="login">
+                  <div className="space-y-2 mb-6">
+                    <h2 className="text-2xl font-heading font-black text-slate-900">Welcome Back</h2>
+                    <p className="text-sm text-slate-500 font-medium">Enter your details to access your dashboard.</p>
+                  </div>
+                  <form onSubmit={handleLogin} className="space-y-5">
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="font-bold text-slate-700">Email</Label>
+                      <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-12 rounded-xl bg-slate-50 border-slate-200 focus-visible:ring-purple-500 font-medium" />
                     </div>
-                    <FormField control={form.control} name="email" render={({ field }) => (
-                      <FormItem><FormLabel className="font-bold">Email</FormLabel><FormControl><Input type="email" className="h-11 rounded-xl bg-slate-50 border-slate-200" {...field} /></FormControl></FormItem>
-                    )} />
-                    <FormField control={form.control} name="password" render={({ field }) => (
-                      <FormItem><FormLabel className="font-bold">Password</FormLabel><FormControl><Input type="password" className="h-11 rounded-xl bg-slate-50 border-slate-200" {...field} /></FormControl></FormItem>
-                    )} />
-                    <Button type="submit" className="w-full h-12 rounded-xl font-bold bg-blue-600 hover:bg-blue-500 shadow-lg shadow-blue-500/20 text-base mt-4">Create Account</Button>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="password" className="font-bold text-slate-700">Password</Label>
+                        <a href="#" className="text-xs font-bold text-purple-600 hover:text-purple-700">Forgot password?</a>
+                      </div>
+                      <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="h-12 rounded-xl bg-slate-50 border-slate-200 focus-visible:ring-purple-500 font-medium" />
+                    </div>
+                    <Button type="submit" className="w-full h-12 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-base shadow-sm transition-all hover:-translate-y-0.5">
+                      Log In <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                    <div className="text-center mt-4">
+                      <p className="text-xs text-slate-500 font-medium">Demo Accounts: demo@student.com (Student) / admin@copilot.com (Admin) <br/> Password: password123</p>
+                    </div>
                   </form>
-                </Form>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                </TabsContent>
+                
+                <TabsContent value="register">
+                  <div className="space-y-2 mb-6">
+                    <h2 className="text-2xl font-heading font-black text-slate-900">Create Account</h2>
+                    <p className="text-sm text-slate-500 font-medium">Start optimizing your resume for free.</p>
+                  </div>
+                  <form onSubmit={handleRegister} className="space-y-5">
+                    <div className="space-y-2">
+                      <Label htmlFor="reg-name" className="font-bold text-slate-700">Full Name</Label>
+                      <Input id="reg-name" placeholder="John Doe" value={name} onChange={(e) => setName(e.target.value)} required className="h-12 rounded-xl bg-slate-50 border-slate-200 focus-visible:ring-purple-500 font-medium" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="reg-email" className="font-bold text-slate-700">Email</Label>
+                      <Input id="reg-email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-12 rounded-xl bg-slate-50 border-slate-200 focus-visible:ring-purple-500 font-medium" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="reg-password" className="font-bold text-slate-700">Password</Label>
+                      <Input id="reg-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="h-12 rounded-xl bg-slate-50 border-slate-200 focus-visible:ring-purple-500 font-medium" />
+                    </div>
+                    <Button type="submit" className="w-full h-12 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-base shadow-sm transition-all hover:-translate-y-0.5">
+                      Create Account
+                    </Button>
+                  </form>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
