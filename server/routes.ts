@@ -99,5 +99,23 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/resume/analyze", async (req, res) => {
+    try {
+      if (!req.session.userId) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+      const { resumeText } = req.body;
+      if (!resumeText) {
+        return res.status(400).json({ error: "Resume text required" });
+      }
+      const { calculateATSScore } = await import("./ats");
+      const result = calculateATSScore(resumeText);
+      return res.json(result);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Server error" });
+    }
+  });
+
   return httpServer;
 }
