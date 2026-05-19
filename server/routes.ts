@@ -4,6 +4,7 @@ import { db } from "./storage";
 import { users } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcrypt";
+import session from "express-session";
 
 declare module "express-session" {
   interface SessionData {
@@ -72,6 +73,30 @@ export async function registerRoutes(
     const [user] = await db.select().from(users).where(eq(users.id, req.session.userId));
     if (!user) return res.status(401).json({ error: "User not found" });
     return res.json({ id: user.id, name: user.name, email: user.email });
+  });
+
+  app.post("/api/resume/upload", async (req, res) => {
+    try {
+      if (!req.session.userId) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+      const chunks: Buffer[] = [];
+      req.on("data", (chunk) => chunks.push(chunk));
+      req.on("end", async () => {
+        try {
+          const buffer = Buffer.concat(chunks);
+          const { extractTextFromPDF } = await import("./pdf");
+          const text = await extractTextFromPDF(buffer);
+          return res.json({ text, length: text.length });
+        } catch (err) {
+          console.error(err);
+          return res.status(500).json({ error: "Failed to parse PDF" });
+        }
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Server error" });
+    }
   });
 
   return httpServer;
