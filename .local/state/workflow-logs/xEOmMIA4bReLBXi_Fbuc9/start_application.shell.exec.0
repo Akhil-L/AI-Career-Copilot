@@ -1,0 +1,185 @@
+
+> rest-express@1.0.0 dev:client
+> vite dev --port 5000
+
+[1G[0K
+
+[1;1H[0J
+  [32m[1mVITE[22m v7.3.1[39m  [2mready in [0m[1m381[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5000[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://172.24.0.2:[1m5000[22m/[39m
+[2m[32m  ➜[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
+[2m5:32:11 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: Failed to resolve import "./dashboard-worker" from "client/src/pages/skill-gap.tsx". Does the file exist?
+  Plugin: [35mvite:import-analysis[39m
+  File: [36m/home/runner/workspace/client/src/pages/skill-gap.tsx[39m:3:30
+[33m  3  |  import { Layout } from "@/components/layout";
+  4  |  import { useStore } from "@/lib/store";
+  5  |  import { getWorkerRank } from "./dashboard-worker";
+     |                                 ^
+  6  |  import { CONFIG } from "@/lib/config";
+  7  |  import { Button } from "@/components/ui/button";[39m
+
+
+
+
+
+
+
+[1;1H[0J[2m5:32:11 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: Failed to resolve import "./dashboard-worker" from "client/src/pages/skill-gap.tsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36m/home/runner/workspace/client/src/pages/skill-gap.tsx[39m:3:30
+[33m  3  |  import { Layout } from "@/components/layout";
+  4  |  import { useStore } from "@/lib/store";
+  5  |  import { getWorkerRank } from "./dashboard-worker";
+     |                                 ^
+  6  |  import { CONFIG } from "@/lib/config";
+  7  |  import { Button } from "@/components/ui/button";[39m
+      at TransformPluginContext._formatLog (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/config.js:28999:43)
+      at TransformPluginContext.error (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/config.js:28996:14)
+      at normalizeUrl (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/config.js:27119:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at async file:///home/runner/workspace/node_modules/vite/dist/node/chunks/config.js:27177:32
+      at async Promise.all (index 3)
+      at async TransformPluginContext.transform (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/config.js:27145:4)
+      at async EnvironmentPluginContainer.transform (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/config.js:28797:14)
+      at async loadAndTransform (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/config.js:22670:26)
+      at async viteTransformMiddleware (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/config.js:24542:20)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m5:32:11 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: Failed to resolve import "./dashboard-worker" from "client/src/pages/skill-gap.tsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36m/home/runner/workspace/client/src/pages/skill-gap.tsx[39m:3:30
+[33m  3  |  import { Layout } from "@/components/layout";
+  4  |  import { useStore } from "@/lib/store";
+  5  |  import { getWorkerRank } from "./dashboard-worker";
+     |                                 ^
+  6  |  import { CONFIG } from "@/lib/config";
+  7  |  import { Button } from "@/components/ui/button";[39m
+      at TransformPluginContext._formatLog (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/config.js:28999:43)
+      at TransformPluginContext.error (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/config.js:28996:14)
+      at normalizeUrl (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/config.js:27119:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at async file:///home/runner/workspace/node_modules/vite/dist/node/chunks/config.js:27177:32
+      at async Promise.all (index 3)
+      at async TransformPluginContext.transform (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/config.js:27145:4)
+      at async EnvironmentPluginContainer.transform (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/config.js:28797:14)
+      at async loadAndTransform (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/config.js:22670:26)
+      at async viteTransformMiddleware (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/config.js:24542:20) [33m(x2)[39m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m5:32:26 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css[22m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m5:32:26 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/components/layout.tsx[22m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[1;1H[0J[2m5:32:27 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/components/layout.tsx[22m [33m(x2)[39m
