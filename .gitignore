@@ -1,6 +1,82 @@
-node_modules
-dist
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment variables
+.env
+.env.*
+
+# junk
+.local/
+state/
+agent/
+scribe/
+workflow-logs/
+skills/
+artifacts/
+canvas/
+design/
+external_apis/
+follow-up-tasks/
+image-search/
+mockup-extract/
+mockup-graduate/
+revenuecat/
+skill-authoring/
+stripe/
+threat_modeling/
+validation/
+secondary_skills/
+ad-creative/
+ai-recruiter/
+ai-sdr/
+ai-secretary/
+branding-generator/
+competitive-analysis/
+content-machine/
+deep-research/
+design-thinker/
+excel-generator/
+file-converter/
+flashcard-generator/
+github-solution-finder/
+infographic-builder/
+insurance-optimizer/
+interview-prep/
+invoice-generator/
+legal-contract/
+meal-planner/
+personal-shopper/
+podcast-generator/
+product-manager/
+programmatic-seo/
+real-estate-analyzer/
+recipe-creator/
+resume-maker/
+seo-auditor/
+skill-creator/
+skill-finder/
+stock-analyzer/
+storyboard/
+supplier-research/
+tax-reviewer/
+travel-assistant/
+video-editing/
+website-cloning/
+attached_assets/
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+
+# OS
 .DS_Store
+
+# Vite
 server/public
 vite.config.ts.*
 *.tar.gz
