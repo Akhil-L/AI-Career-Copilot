@@ -35,9 +35,12 @@ export async function registerRoutes(
       }).returning();
       req.session.userId = user.id;
       req.session.save((err) => {
-  if (err) return res.status(500).json({ error: "Session error" });
-  return res.json({ id: user.id, name: user.name, email: user.email });
-});
+        if (err) {
+          console.error("Session save error:", err);
+          return res.status(500).json({ error: "Session error" });
+        }
+        return res.json({ id: user.id, name: user.name, email: user.email });
+      });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Server error" });
@@ -56,7 +59,13 @@ export async function registerRoutes(
         return res.status(401).json({ error: "Invalid credentials" });
       }
       req.session.userId = user.id;
-      return res.json({ id: user.id, name: user.name, email: user.email });
+      req.session.save((err) => {
+        if (err) {
+          console.error("Session save error:", err);
+          return res.status(500).json({ error: "Session error" });
+        }
+        return res.json({ id: user.id, name: user.name, email: user.email });
+      });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Server error" });
