@@ -1,5 +1,3 @@
-import { Buffer } from "buffer";
-
 const handleUpload = async () => {
     if (!file) return;
     setIsProcessing(true);
@@ -7,7 +5,7 @@ const handleUpload = async () => {
     try {
       // Step 1: Upload and extract text from PDF
       const arrayBuffer = await file.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
+      const buffer = new Uint8Array(arrayBuffer);
       
       const uploadResponse = await fetch("/api/resume/upload", {
         method: "POST",
