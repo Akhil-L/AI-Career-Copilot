@@ -27,7 +27,7 @@ function Router() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch("https://workflow-backend-mdfx.onrender.com/api/me", {
+        const response = await fetch("/api/me", {
           method: "GET",
           credentials: "include",
           headers: {
