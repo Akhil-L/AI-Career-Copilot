@@ -34,7 +34,10 @@ export async function registerRoutes(
         password: hashedPassword,
       }).returning();
       req.session.userId = user.id;
-      return res.json({ id: user.id, name: user.name, email: user.email });
+      req.session.save((err) => {
+  if (err) return res.status(500).json({ error: "Session error" });
+  return res.json({ id: user.id, name: user.name, email: user.email });
+});
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Server error" });
